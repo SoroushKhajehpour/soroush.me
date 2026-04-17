@@ -6,17 +6,18 @@ import { cn } from "@/lib/utils";
 
 const FLAP_CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$()-+&=;:'\"%,./?°";
 
-const BOARD_ROWS = 6;
-const BOARD_COLS = 22;
+const BOARD_ROWS = 2;
+const BOARD_COLS = 28;
 
-const BASE_COL_DELAY = 30;
-const BASE_ROW_DELAY = 20;
-const BASE_STEP_MS = 55;
-const BASE_FLIP_S = 0.35;
+const BASE_COL_DELAY = 22;
+const BASE_ROW_DELAY = 14;
+const BASE_STEP_MS = 40;
+const BASE_FLIP_S = 0.28;
+/** Rough seconds used for `duration` scaling; matches tighter cascade + fewer scrambles. */
 const BASE_TOTAL_S =
   ((BOARD_COLS - 1) * BASE_COL_DELAY +
     (BOARD_ROWS - 1) * BASE_ROW_DELAY +
-    8 * BASE_STEP_MS) /
+    12 * BASE_STEP_MS) /
   1000;
 
 type AccentColor = {
@@ -47,11 +48,13 @@ const FlapCell = React.memo(function FlapCell({
   delay,
   stepMs,
   flipDuration,
+  finalTextClassName,
 }: {
   target: string;
   delay: number;
   stepMs: number;
   flipDuration: number;
+  finalTextClassName?: string;
 }) {
   const [current, setCurrent] = useState(" ");
   const [prev, setPrev] = useState(" ");
@@ -80,8 +83,8 @@ const FlapCell = React.memo(function FlapCell({
 
     const scrambleCount =
       normalized === " "
-        ? 8 + Math.floor(Math.random() * 8)
-        : 25 + Math.floor(Math.random() * 15);
+        ? 4 + Math.floor(Math.random() * 4)
+        : 10 + Math.floor(Math.random() * 6);
 
     const runStep = (i: number) => {
       const isLast = i === scrambleCount;
@@ -126,10 +129,12 @@ const FlapCell = React.memo(function FlapCell({
     "absolute inset-x-0 flex select-none items-center justify-center font-mono font-bold tracking-wide";
   const topBg = accent?.top ?? "bg-neutral-200/80 dark:bg-neutral-900";
   const bottomBg = accent?.bottom ?? "bg-neutral-200/80 dark:bg-neutral-900";
-  const textColor = accent?.text ?? "text-neutral-800 dark:text-white";
+  const defaultTextColor =
+    finalTextClassName ?? "text-neutral-800 dark:text-white";
+  const textColor = accent?.text ?? defaultTextColor;
 
   const flapTopBg = prevAccent?.top ?? "bg-neutral-100 dark:bg-neutral-800";
-  const flapTextColor = prevAccent?.text ?? "text-neutral-800 dark:text-white";
+  const flapTextColor = prevAccent?.text ?? defaultTextColor;
 
   const bottomDelay = flipDuration * 0.5;
 
@@ -259,7 +264,8 @@ const FlapCell = React.memo(function FlapCell({
   prevProps.target === nextProps.target &&
   prevProps.delay === nextProps.delay &&
   prevProps.stepMs === nextProps.stepMs &&
-  prevProps.flipDuration === nextProps.flipDuration,
+  prevProps.flipDuration === nextProps.flipDuration &&
+  prevProps.finalTextClassName === nextProps.finalTextClassName,
 );
 
 // ── Color Tile ────────────────────────────────────────────────────────
@@ -285,14 +291,31 @@ const ColorCell = React.memo(function ColorCell({ color }: { color: string }) {
 
 // ── Row Parser ────────────────────────────────────────────────────────
 
+/**
+ * Named text colors usable via inline tokens, e.g. `[[blue]]hello[[/]]`.
+ * Close with `[[/]]` or start a new color to switch.
+ */
+const TEXT_COLOR_MAP: Record<string, string> = {
+  blue: "text-sky-300",
+  gold: "text-[#d4af37]",
+  red: "text-red-400",
+  green: "text-emerald-400",
+  yellow: "text-yellow-300",
+  orange: "text-orange-400",
+  violet: "text-violet-400",
+  white: "text-white",
+};
+
 type ParsedCell =
-  | { type: "char"; value: string }
+  | { type: "char"; value: string; className?: string }
   | { type: "color"; hex: string };
 
 function parseRow(row: string): ParsedCell[] {
   const cells: ParsedCell[] = [];
+  let currentClass: string | undefined = undefined;
   let i = 0;
   while (i < row.length) {
+    // Color tile: {R}, {G}, etc.
     if (row[i] === "{" && i + 2 < row.length && row[i + 2] === "}") {
       const code = row.substring(i, i + 3);
       if (COLOR_MAP[code]) {
@@ -301,10 +324,56 @@ function parseRow(row: string): ParsedCell[] {
         continue;
       }
     }
-    cells.push({ type: "char", value: row[i] });
+    // Inline text color tokens: [[name]]...[[/]]
+    if (row[i] === "[" && row[i + 1] === "[") {
+      const close = row.indexOf("]]", i + 2);
+      if (close !== -1) {
+        const inner = row.substring(i + 2, close);
+        if (inner === "/") {
+          currentClass = undefined;
+          i = close + 2;
+          continue;
+        }
+        if (TEXT_COLOR_MAP[inner]) {
+          currentClass = TEXT_COLOR_MAP[inner];
+          i = close + 2;
+          continue;
+        }
+      }
+    }
+    cells.push({ type: "char", value: row[i], className: currentClass });
     i++;
   }
   return cells;
+}
+
+/** Count cells the row will render, ignoring tokens that don't emit cells. */
+function visualLength(str: string): number {
+  let len = 0;
+  let i = 0;
+  while (i < str.length) {
+    if (str[i] === "{" && i + 2 < str.length && str[i + 2] === "}") {
+      const code = str.substring(i, i + 3);
+      if (COLOR_MAP[code]) {
+        len += 1;
+        i += 3;
+        continue;
+      }
+    }
+    if (str[i] === "[" && str[i + 1] === "[") {
+      const close = str.indexOf("]]", i + 2);
+      if (close !== -1) {
+        const inner = str.substring(i + 2, close);
+        if (inner === "/" || TEXT_COLOR_MAP[inner]) {
+          i = close + 2;
+          continue;
+        }
+      }
+    }
+    len += 1;
+    i += 1;
+  }
+  return len;
 }
 
 // ── Word Wrap ─────────────────────────────────────────────────────────
@@ -315,7 +384,8 @@ function wrapParagraph(paragraph: string, maxCols: number): string[] {
   let currentLine = "";
 
   for (const word of words) {
-    if (word.length > maxCols) {
+    const wordLen = visualLength(word);
+    if (wordLen > maxCols) {
       if (currentLine) {
         lines.push(currentLine);
         currentLine = "";
@@ -326,7 +396,7 @@ function wrapParagraph(paragraph: string, maxCols: number): string[] {
 
     if (!currentLine) {
       currentLine = word;
-    } else if (currentLine.length + 1 + word.length <= maxCols) {
+    } else if (visualLength(currentLine) + 1 + wordLen <= maxCols) {
       currentLine += " " + word;
     } else {
       lines.push(currentLine);
@@ -352,7 +422,7 @@ export interface TextFlippingBoardProps {
   rows?: string[];
   text?: string;
   className?: string;
-  /** Total animation duration in seconds. Defaults to ~1.2s. */
+  /** Total animation duration in seconds. Scales column/row stagger and flip timing. */
   duration?: number;
 }
 
@@ -430,6 +500,7 @@ export function TextFlippingBoard({
                 delay={c * colDelay + r * rowDelay}
                 stepMs={stepMs}
                 flipDuration={flipDur}
+                finalTextClassName={cell.className}
               />
             ),
           ),
