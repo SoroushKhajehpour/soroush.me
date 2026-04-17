@@ -22,16 +22,18 @@ const entries: Entry[] = [
   },
 ];
 
-export default function Experience() {
+export default function ExperiencePage() {
   return (
-    <section id="experience" className="py-20 px-6 md:px-12">
-      <h2 className="text-2xl font-semibold text-black">Experience</h2>
+    <section>
+      <h1 className="text-3xl md:text-4xl font-semibold text-black">
+        Experience
+      </h1>
       <div className="mt-8 flex flex-col gap-8 max-w-2xl">
         {entries.map((entry, index) => (
           <div key={index}>
-            <h3 className="text-base font-semibold text-black">
+            <h2 className="text-base font-semibold text-black">
               {entry.role}
-            </h3>
+            </h2>
             <p className="text-base text-gray-600">{entry.organization}</p>
             <p className="mt-2 text-base text-gray-600">{entry.description}</p>
           </div>

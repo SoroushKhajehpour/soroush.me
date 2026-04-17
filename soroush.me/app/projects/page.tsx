@@ -22,19 +22,21 @@ const projects: Project[] = [
   },
 ];
 
-export default function Projects() {
+export default function ProjectsPage() {
   return (
-    <section id="projects" className="py-20 px-6 md:px-12">
-      <h2 className="text-2xl font-semibold text-black">Projects</h2>
+    <section>
+      <h1 className="text-3xl md:text-4xl font-semibold text-black">
+        Projects
+      </h1>
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
           <article
             key={project.title}
             className="border border-gray-200 p-6"
           >
-            <h3 className="text-base font-semibold text-black">
+            <h2 className="text-base font-semibold text-black">
               {project.title}
-            </h3>
+            </h2>
             <p className="mt-2 text-base text-gray-600">
               {project.description}
             </p>
