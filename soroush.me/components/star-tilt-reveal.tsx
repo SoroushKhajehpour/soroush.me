@@ -20,7 +20,7 @@ export function StarTiltReveal() {
       <div className="relative inline-flex flex-col items-end">
         <div
           className={cn(
-            "absolute right-0 bottom-full z-10 mb-1 flex w-[min(188px,68vw)] max-w-[min(188px,calc(100vw-1.5rem))] -translate-x-1 -translate-y-0.5 flex-col transition-opacity duration-200",
+            "absolute right-0 bottom-full z-10 mb-1 flex w-[min(156px,58vw)] max-w-[min(156px,calc(100vw-1.5rem))] -translate-x-1 -translate-y-0.5 flex-col transition-opacity duration-200",
             open && hasLoadedCard
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",
@@ -29,7 +29,7 @@ export function StarTiltReveal() {
         >
           {hasLoadedCard && (
             <Suspense fallback={null}>
-              <div className="h-[min(200px,min(30vh,calc(100vh-6rem)))] w-full shrink-0 max-h-[calc(100vh-6rem)]">
+              <div className="h-[min(164px,min(25vh,calc(100vh-6rem)))] w-full shrink-0 max-h-[calc(100vh-6rem)]">
                 <TiltCard
                   className="h-full w-full"
                   image={{

@@ -34,8 +34,8 @@ export default function Navbar() {
                 className={cn(
                   "font-serif",
                   isActive(link.href)
-                    ? "text-white"
-                    : "text-gray-400 hover:text-white",
+                    ? "text-violet-200"
+                    : "text-violet-400 hover:text-violet-300",
                 )}
               >
                 {link.label}
