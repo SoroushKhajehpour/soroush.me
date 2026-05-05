@@ -300,7 +300,7 @@ function Card({
               className={cn(
                 "relative flex min-h-0 min-w-0 flex-1 flex-col pr-3",
                 singleWide
-                  ? "justify-center gap-1 p-3 py-2"
+                  ? "justify-start gap-1.5 p-4 py-4"
                   : "justify-between p-4",
               )}
             >
@@ -341,7 +341,7 @@ function Card({
                 <p
                   className={cn(
                     "text-[14px] opacity-70",
-                    singleWide ? "line-clamp-2" : "line-clamp-3",
+                    singleWide ? "" : "line-clamp-3",
                   )}
                   style={{ color: textColor }}
                 >
@@ -371,15 +371,13 @@ function Card({
                 </button>
               )}
             </div>
-            <div className="flex w-[min(42%,220px)] min-w-[140px] shrink-0 flex-col justify-center self-stretch border-l border-white/10 bg-white px-4 py-2 sm:min-w-[160px] sm:px-5 sm:py-2.5">
-              <div className="flex h-[92px] w-full items-center justify-center sm:h-[112px]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={cardImage.src}
-                  alt={cardImage.alt}
-                  className="max-h-full max-w-full object-contain object-center"
-                />
-              </div>
+            <div className="flex w-[min(42%,250px)] min-w-[140px] shrink-0 flex-col justify-center self-stretch border-l border-white/10 sm:min-w-[180px]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={cardImage.src}
+                alt={cardImage.alt}
+                className="h-full w-full object-cover"
+              />
             </div>
           </div>
         ) : (
