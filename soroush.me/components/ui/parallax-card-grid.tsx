@@ -627,6 +627,7 @@ function Card({
                   ? "max-md:max-h-[100px] max-md:py-2 max-md:min-h-0!"
                   : "max-md:aspect-video max-md:w-full",
                 mediaFitContain && "bg-[#2a2a2a]",
+                !mediaFitContain && "max-md:bg-[#2a2a2a]",
                 landscapeStripMinH,
               )}
             >
@@ -654,7 +655,10 @@ function Card({
                       <DemoVideoPlayer
                         src={cardImage.demoVideoSrc}
                         ariaLabel={cardImage.alt}
-                        className={stripMediaClass}
+                        className={cn(
+                          stripMediaClass,
+                          !mediaFitContain && "max-md:object-contain!",
+                        )}
                         onPlaybackComplete={() => setDemoPlaying(false)}
                       />
                     </div>
@@ -667,7 +671,7 @@ function Card({
                         className={cn(
                           stripMediaClass,
                           !mediaFitContain &&
-                            "max-md:absolute max-md:inset-0 max-md:h-full max-md:w-full max-md:object-cover max-md:object-center",
+                            "max-md:absolute max-md:inset-0 max-md:h-full max-md:w-full max-md:object-contain max-md:object-center",
                         )}
                       />
                       <PlayDemoButton onPress={() => setDemoPlaying(true)} />
@@ -686,7 +690,10 @@ function Card({
                   role="presentation"
                 >
                   <video
-                    className="h-full w-full object-cover object-center"
+                    className={cn(
+                      "h-full w-full object-cover object-center",
+                      !mediaFitContain && "max-md:object-contain!",
+                    )}
                     src={cardImage.src}
                     poster={cardImage.poster}
                     playsInline
@@ -708,7 +715,7 @@ function Card({
                     mediaFitContain &&
                       "max-md:h-full max-md:max-h-full max-md:w-full max-md:object-contain max-md:object-center",
                     !mediaFitContain &&
-                      "max-md:absolute max-md:inset-0 max-md:h-full max-md:w-full max-md:object-cover max-md:object-center",
+                      "max-md:absolute max-md:inset-0 max-md:h-full max-md:w-full max-md:object-contain max-md:object-center",
                   )}
                 />
               )}
@@ -736,7 +743,10 @@ function Card({
                         className={
                           mediaFitContain
                             ? "max-h-full max-w-full object-contain object-center"
-                            : "h-full w-full object-cover object-center"
+                            : cn(
+                                "h-full w-full object-cover object-center",
+                                "max-md:object-contain!",
+                              )
                         }
                         onPlaybackComplete={() => setDemoPlaying(false)}
                       />
@@ -756,7 +766,10 @@ function Card({
                         className={
                           mediaFitContain
                             ? "max-h-full max-w-full object-contain object-center"
-                            : "h-full w-full object-cover object-center"
+                            : cn(
+                                "h-full w-full object-cover object-center",
+                                "max-md:object-contain!",
+                              )
                         }
                       />
                       <PlayDemoButton onPress={() => setDemoPlaying(true)} />
@@ -791,7 +804,10 @@ function Card({
                     role="presentation"
                   >
                     <video
-                      className="h-full w-full object-cover object-center"
+                      className={cn(
+                        "h-full w-full object-cover object-center",
+                        !mediaFitContain && "max-md:object-contain!",
+                      )}
                       src={cardImage.src}
                       poster={cardImage.poster}
                       playsInline
