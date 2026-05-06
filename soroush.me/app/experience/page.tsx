@@ -11,7 +11,7 @@ const ParallaxCardGrid = dynamic(() => import("@/components/ui/parallax-card-gri
 
 export default function ExperiencePage() {
   return (
-    <section className="mx-auto w-full max-w-3xl px-6">
+    <section className="mx-auto w-full max-w-3xl md:px-6">
       <p className="mb-8 font-serif text-lg font-bold text-white">
         Previously,
       </p>

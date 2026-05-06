@@ -25,13 +25,13 @@ const StarTiltReveal = dynamic(() =>
 export default function HomePage() {
   return (
     <>
-      <div className="flex min-h-[calc(100vh-32rem)] w-full flex-col justify-center">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-12">
+      <div className="flex min-h-[38vh] w-full flex-col justify-center sm:min-h-[44vh] md:min-h-[calc(100vh-32rem)]">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 md:gap-12">
           <TextFlippingBoard
             text={"[[blue]]Soroush Khajehpour[[/]]\n[[violet]]1B Computer Engineering"}
             duration={0.7}
           />
-          <div className="space-y-5 text-left font-serif text-lg leading-relaxed text-white">
+          <div className="space-y-4 text-left font-serif text-base leading-relaxed text-white md:space-y-5 md:text-lg">
             <p>
               I&apos;m a{" "}
               <a

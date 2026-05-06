@@ -2,7 +2,7 @@ import { Download } from "lucide-react";
 
 export default function ResumePage() {
   return (
-    <section className="flex flex-col items-center gap-6">
+    <section className="flex w-full max-w-full flex-col items-center gap-4 px-0 sm:gap-6">
       <a
         href="/resume.pdf"
         download="Soroush Khajehpour - Resume.pdf"
@@ -15,7 +15,7 @@ export default function ResumePage() {
         src="/resume.pdf#toolbar=0&navpanes=0&scrollbar=0&view=Fit"
         title="Soroush Khajehpour Resume"
         loading="lazy"
-        className="aspect-[8.5/11] w-full max-w-4xl rounded-none border-0 bg-transparent"
+        className="aspect-[8.5/11] min-h-[72vh] w-full max-w-4xl rounded-none border-0 bg-transparent md:min-h-0"
       />
     </section>
   );

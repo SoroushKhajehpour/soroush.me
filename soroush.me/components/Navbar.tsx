@@ -24,15 +24,15 @@ export default function Navbar() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#1f1f1f] font-serif">
-      <nav className="relative flex items-center justify-center px-6 md:px-12 h-16">
-        <ul className="flex items-center gap-6">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#1f1f1f] font-serif pt-[env(safe-area-inset-top)]">
+      <nav className="relative flex flex-col items-stretch gap-2 px-4 py-2 md:h-16 md:flex-row md:items-center md:justify-center md:gap-0 md:px-12 md:py-0">
+        <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:gap-6">
           {links.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
                 className={cn(
-                  "font-serif",
+                  "font-serif text-sm md:text-base",
                   isActive(link.href)
                     ? "text-violet-200"
                     : "text-violet-400 hover:text-violet-300",
@@ -43,7 +43,7 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
-        <div className="absolute right-6 md:right-12 top-1/2 flex -translate-y-1/2 items-center gap-4">
+        <div className="flex items-center justify-center gap-3 md:absolute md:top-1/2 md:right-12 md:-translate-y-1/2 md:justify-end md:gap-4">
           <a
             href="mailto:s3khajeh@uwaterloo.ca"
             className="text-gray-400 transition-colors hover:text-white"

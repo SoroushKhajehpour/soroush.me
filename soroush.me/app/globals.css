@@ -121,6 +121,13 @@ body {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Single-column parallax cards: drop shared min-height on narrow screens */
+@media (max-width: 767px) {
+  [data-parallax-card-row] {
+    min-height: unset !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -16,7 +16,7 @@ export function StarTiltReveal() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 md:bottom-8 md:right-8">
+    <div className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-40 md:bottom-8 md:right-8">
       <div className="relative inline-flex flex-col items-end">
         <div
           className={cn(

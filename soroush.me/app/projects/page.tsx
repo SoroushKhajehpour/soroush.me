@@ -39,7 +39,7 @@ const PROJECTS: ParallaxCardItem[] = [
 
 export default function ProjectsPage() {
   return (
-    <section className="mx-auto w-full max-w-3xl px-6">
+    <section className="mx-auto w-full max-w-3xl md:px-6">
       <ParallaxCardGrid
         cards={PROJECTS}
         theme="dark"

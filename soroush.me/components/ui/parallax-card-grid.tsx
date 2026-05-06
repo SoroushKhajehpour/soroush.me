@@ -515,7 +515,7 @@ function Card({
           <div
             data-parallax-card-row={singleWide ? "" : undefined}
             className={cn(
-              "flex w-full flex-row items-stretch",
+              "flex w-full flex-col items-stretch md:flex-row",
               singleWide ? "min-h-0" : "h-full",
               rowMinUntilUniform,
             )}
@@ -527,10 +527,10 @@ function Card({
           >
             <div
               className={cn(
-                "relative flex min-h-0 min-w-0 flex-1 flex-col pr-3",
+                "relative flex min-h-0 min-w-0 flex-1 flex-col max-md:pb-3 max-md:pr-0 md:pr-3",
                 singleWide
                   ? comfortableRow
-                    ? "justify-start gap-2 px-5 py-6"
+                    ? "justify-start gap-2 px-4 py-4 md:px-5 md:py-6"
                     : "justify-start gap-1.5 p-4 py-4"
                   : "justify-between p-4",
               )}
@@ -612,7 +612,7 @@ function Card({
             </div>
             <div
               className={cn(
-                "flex w-[min(42%,250px)] min-w-[140px] shrink-0 flex-col justify-center self-stretch border-l border-white/10 sm:min-w-[180px]",
+                "flex w-full min-w-0 shrink-0 flex-col justify-center self-stretch border-t border-white/10 max-md:aspect-16/10 max-md:min-h-[156px] md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
                 mediaFitContain && "bg-[#2a2a2a]",
                 landscapeStripMinH,
               )}
