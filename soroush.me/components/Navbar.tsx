@@ -9,6 +9,7 @@ import {
   FaLinkedinIn,
   FaXTwitter,
 } from "react-icons/fa6";
+import TopScrollProgress from "@/components/top-scroll-progress";
 
 const links = [
   { href: "/", label: "Home" },
@@ -25,6 +26,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#1f1f1f] font-serif pt-[env(safe-area-inset-top)]">
+      <TopScrollProgress />
       <nav className="relative flex flex-col items-stretch gap-2 px-4 py-2 md:h-16 md:flex-row md:items-center md:justify-center md:gap-0 md:px-12 md:py-0">
         <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:gap-6">
           {links.map((link) => (

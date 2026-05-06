@@ -42,7 +42,16 @@ export default function HomePage() {
               >
                 Computer Engineering
               </a>{" "}
-              student at the University of Waterloo with an interest in backend
+              student at the{" "}
+              <img
+                src="/waterloo-logo.svg"
+                alt="University of Waterloo logo"
+                width={16}
+                height={16}
+                className="mr-1 inline-block size-4 align-[-2px]"
+              />
+              University of Waterloo{" "}
+              with an interest in backend
               systems and machine learning.
             </p>
             <p>

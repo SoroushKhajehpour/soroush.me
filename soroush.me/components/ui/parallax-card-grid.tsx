@@ -205,7 +205,7 @@ const DEFAULT_CARDS: ParallaxCardItem[] = [
     title: "Roam",
     titleHref: "https://www.roam.auto/",
     titleMutedSuffix: " - Software Engineering Intern",
-    year: "2026",
+    year: "Jan - April 2026",
     description:
       "Built backend systems and real-time integrations for a fleet maintenance platform.",
   },
@@ -381,6 +381,7 @@ function Card({
     : "h-full w-full object-cover object-center";
 
   const gitHubHref = githubRepoHref(card.titleHref);
+  const isYearRange = card.year?.includes("-") ?? false;
 
   const comfortableRow = comfortableSingleWide && singleWide;
   const landscapeStripMinH = singleWide
@@ -569,6 +570,8 @@ function Card({
                         <span
                           className={cn(
                             "shrink-0 tabular-nums",
+                            isYearRange &&
+                              "text-[11px] leading-none font-medium tracking-[0.08em]",
                             theme === "dark"
                               ? "text-neutral-400"
                               : "text-neutral-500",
@@ -870,6 +873,8 @@ function Card({
                     <span
                       className={cn(
                         "shrink-0 tabular-nums",
+                        isYearRange &&
+                          "text-[11px] leading-none font-medium tracking-[0.08em]",
                         theme === "dark" ? "text-neutral-400" : "text-neutral-500",
                       )}
                     >
