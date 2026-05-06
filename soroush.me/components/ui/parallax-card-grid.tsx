@@ -307,7 +307,7 @@ function CardTitleText({
         <span
           className={cn(
             "font-medium",
-            theme === "dark" ? "text-neutral-400" : "text-neutral-500",
+            theme === "dark" ? "text-white" : "text-neutral-500",
           )}
         >
           {card.titleMutedSuffix}
@@ -571,7 +571,7 @@ function Card({
                           className={cn(
                             "shrink-0 tabular-nums",
                             isYearRange &&
-                              "text-[11px] leading-none font-medium tracking-[0.08em]",
+                              "text-[13px] leading-tight font-normal tracking-normal",
                             theme === "dark"
                               ? "text-neutral-400"
                               : "text-neutral-500",
@@ -874,7 +874,7 @@ function Card({
                       className={cn(
                         "shrink-0 tabular-nums",
                         isYearRange &&
-                          "text-[11px] leading-none font-medium tracking-[0.08em]",
+                          "text-[13px] leading-tight font-normal tracking-normal",
                         theme === "dark" ? "text-neutral-400" : "text-neutral-500",
                       )}
                     >
