@@ -98,7 +98,7 @@ export default function Grain({
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 z-55 pointer-events-none overflow-hidden"
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       style={{ opacity, mixBlendMode: blendMode }}
     >
       <div

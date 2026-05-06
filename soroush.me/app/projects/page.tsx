@@ -1,5 +1,17 @@
-import ParallaxCardGrid from "@/components/ui/parallax-card-grid";
+import dynamic from "next/dynamic";
 import type { ParallaxCardItem } from "@/components/ui/parallax-card-grid";
+
+const ParallaxCardGrid = dynamic(() => import("@/components/ui/parallax-card-grid"), {
+  loading: () => (
+    <div
+      className="flex min-h-[min(520px,85vh)] w-full flex-col gap-8"
+      aria-hidden
+    >
+      <div className="h-40 animate-pulse rounded-2xl bg-neutral-800/35 md:h-48" />
+      <div className="h-40 animate-pulse rounded-2xl bg-neutral-800/35 md:h-48" />
+    </div>
+  ),
+});
 
 const PROJECTS: ParallaxCardItem[] = [
   {
@@ -12,18 +24,30 @@ const PROJECTS: ParallaxCardItem[] = [
     description:
       "Tiny pygame racing sim with a human drive mode and a live neuroevolution mode where AI agents evolve to navigate a track using NEAT and reinforcement learning concepts.",
   },
+  {
+    image: {
+      src: "/polyscope.png",
+      alt: "Polyscope",
+      demoVideoSrc: "/polyscope.mp4",
+    },
+    title: "Polyscope",
+    titleHref: "https://github.com/SoroushKhajehpour/PolyScope",
+    description:
+      "Polyscope helps prediction market users evaluate the fine print before they trade. It analyzes a market's resolution rules, highlights ambiguity and rule changes, and surfaces risks that could make an outcome difficult or disputed to resolve.",
+  },
 ];
 
 export default function ProjectsPage() {
   return (
     <section className="mx-auto w-full max-w-3xl px-6">
-      <p className="mb-8 font-serif text-lg font-bold text-white">Projects</p>
       <ParallaxCardGrid
         cards={PROJECTS}
         theme="dark"
         backgroundColor="transparent"
-        gap={0}
+        gap={32}
         singleWide
+        comfortableSingleWide
+        equalizeSingleWideHeights
       />
     </section>
   );

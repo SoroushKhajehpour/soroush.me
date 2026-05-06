@@ -14,7 +14,8 @@ export default function ResumePage() {
       <iframe
         src="/resume.pdf#toolbar=0&navpanes=0&scrollbar=0&view=Fit"
         title="Soroush Khajehpour Resume"
-        className="w-full max-w-4xl aspect-[8.5/11] border-0 rounded-none bg-transparent"
+        loading="lazy"
+        className="aspect-[8.5/11] w-full max-w-4xl rounded-none border-0 bg-transparent"
       />
     </section>
   );

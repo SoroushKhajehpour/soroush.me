@@ -52,11 +52,11 @@ export function StarTiltReveal() {
           <button
             type="button"
             onClick={toggle}
-            className="shrink-0 cursor-pointer rounded-sm p-1.5 text-blue-300 transition-colors hover:text-blue-200"
+            className="shrink-0 cursor-pointer rounded-sm p-1 text-blue-300 transition-colors hover:text-blue-200"
             aria-label={open ? "Hide photo" : "Show photo"}
             aria-expanded={open}
           >
-            <FaStar className="size-3" aria-hidden />
+            <FaStar className="size-2.5" aria-hidden />
           </button>
         </div>
       </div>

@@ -1,5 +1,26 @@
-import { StarTiltReveal } from "@/components/star-tilt-reveal";
-import { TextFlippingBoard } from "@/components/ui/text-flipping-board";
+import dynamic from "next/dynamic";
+
+const TextFlippingBoard = dynamic(
+  () =>
+    import("@/components/ui/text-flipping-board").then((m) => ({
+      default: m.TextFlippingBoard,
+    })),
+  {
+    loading: () => (
+      <div
+        className="mx-auto h-32 max-w-3xl animate-pulse rounded-xl bg-neutral-800/40 md:h-40"
+        aria-hidden
+      />
+    ),
+    ssr: true,
+  },
+);
+
+const StarTiltReveal = dynamic(() =>
+  import("@/components/star-tilt-reveal").then((m) => ({
+    default: m.StarTiltReveal,
+  })),
+);
 
 export default function HomePage() {
   return (

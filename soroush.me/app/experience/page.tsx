@@ -1,4 +1,13 @@
-import ParallaxCardGrid from "@/components/ui/parallax-card-grid";
+import dynamic from "next/dynamic";
+
+const ParallaxCardGrid = dynamic(() => import("@/components/ui/parallax-card-grid"), {
+  loading: () => (
+    <div
+      className="min-h-[200px] w-full animate-pulse rounded-2xl bg-neutral-800/35"
+      aria-hidden
+    />
+  ),
+});
 
 export default function ExperiencePage() {
   return (
