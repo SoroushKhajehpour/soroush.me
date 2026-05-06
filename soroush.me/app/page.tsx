@@ -68,14 +68,37 @@ export default function HomePage() {
               At this stage, my goal is to build a strong technical foundation and
               gain clarity through hands-on work.
             </p>
-            <p className="text-sm text-neutral-300 md:text-[15px]">
-              <span className="font-semibold uppercase tracking-[0.16em] text-[#93c5fd]">
-                Relevant coursework
-              </span>
-              <span className="mx-1 text-neutral-500">·</span>
-              ECE 108 – Discrete Mathematics &amp; Logic 1, ECE 124 – Digital Circuits &amp;
-              Systems, ECE 140 – Linear Circuits, MATH 119 – Calculus 2 for Engineering.
-            </p>
+            <div className="pt-3 font-serif md:pt-4">
+              <div className="text-sm md:text-[15px]">
+                <span className="font-semibold uppercase tracking-[0.16em] text-[#93c5fd]">
+                  Relevant coursework
+                </span>
+              </div>
+              <div className="mt-2 grid grid-cols-1 gap-2.5 text-[13px] text-neutral-200 sm:grid-cols-2 sm:gap-3 md:text-sm">
+                <div className="rounded-lg border border-white/10 bg-neutral-900/25 px-3 py-2.5 font-serif shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-sm">
+                  <span className="font-semibold text-white">ECE 108</span>{" "}
+                  <span className="text-neutral-300">
+                    (Discrete Mathematics &amp; Logic 1)
+                  </span>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-neutral-900/25 px-3 py-2.5 font-serif shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-sm">
+                  <span className="font-semibold text-white">ECE 124</span>{" "}
+                  <span className="text-neutral-300">
+                    (Digital Circuits &amp; Systems)
+                  </span>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-neutral-900/25 px-3 py-2.5 font-serif shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-sm">
+                  <span className="font-semibold text-white">ECE 140</span>{" "}
+                  <span className="text-neutral-300">(Linear Circuits)</span>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-neutral-900/25 px-3 py-2.5 font-serif shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-sm">
+                  <span className="font-semibold text-white">MATH 119</span>{" "}
+                  <span className="text-neutral-300">
+                    (Calculus 2 for Engineering)
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
