@@ -527,7 +527,7 @@ function Card({
           >
             <div
               className={cn(
-                "relative flex min-h-0 min-w-0 flex-1 flex-col max-md:pb-3 max-md:pr-0 md:pr-3",
+                "relative flex min-h-0 min-w-0 flex-1 flex-col max-md:pb-3 md:pr-3",
                 singleWide
                   ? comfortableRow
                     ? "justify-start gap-2 px-4 py-4 md:px-5 md:py-6"
@@ -543,7 +543,12 @@ function Card({
                   }}
                 />
               )}
-              <div className="relative z-1 flex min-h-0 min-w-0 flex-1 flex-col">
+              <div
+                className={cn(
+                  "relative z-1 flex min-h-0 min-w-0 flex-1 flex-col",
+                  gitHubHref && "max-md:pr-11",
+                )}
+              >
                 <div className="min-h-0 flex-1">
                   <div>
                     <h3
@@ -585,7 +590,12 @@ function Card({
                   </div>
                 </div>
                 {gitHubHref ? (
-                  <div className="mt-auto shrink-0 pt-3">
+                  <div
+                    className={cn(
+                      "mt-auto shrink-0 pt-3",
+                      "max-md:absolute max-md:top-3 max-md:right-3 max-md:z-2 max-md:mt-0 max-md:pt-0",
+                    )}
+                  >
                     <CardGitHubLink href={gitHubHref} title={card.title} />
                   </div>
                 ) : null}
@@ -612,7 +622,10 @@ function Card({
             </div>
             <div
               className={cn(
-                "flex w-full min-w-0 shrink-0 flex-col justify-center self-stretch border-t border-white/10 max-md:aspect-16/10 max-md:min-h-[156px] md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
+                "relative flex w-full min-w-0 shrink-0 flex-col justify-center self-stretch overflow-hidden border-t border-white/10 md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
+                mediaFitContain
+                  ? "max-md:max-h-[100px] max-md:py-2 max-md:min-h-0!"
+                  : "max-md:aspect-video max-md:w-full",
                 mediaFitContain && "bg-[#2a2a2a]",
                 landscapeStripMinH,
               )}
@@ -620,15 +633,20 @@ function Card({
               {hasDemoVideo ? (
                 <div
                   className={cn(
-                    "relative h-full w-full",
+                    "relative h-full min-h-0 w-full flex-1",
                     mediaFitContain &&
                       "flex items-center justify-center p-2 sm:p-2.5",
+                    !mediaFitContain && "max-md:flex max-md:min-h-0 max-md:flex-1",
                     landscapeStripMinH,
                   )}
                 >
                   {demoPlaying && cardImage.demoVideoSrc ? (
                     <div
-                      className="h-full min-h-0 w-full"
+                      className={cn(
+                        "h-full min-h-0 w-full",
+                        !mediaFitContain &&
+                          "max-md:absolute max-md:inset-0 max-md:min-h-0",
+                      )}
                       onClick={(e) => e.stopPropagation()}
                       onPointerDown={(e) => e.stopPropagation()}
                       role="presentation"
@@ -646,7 +664,11 @@ function Card({
                       <img
                         src={cardImage.src}
                         alt={cardImage.alt}
-                        className={stripMediaClass}
+                        className={cn(
+                          stripMediaClass,
+                          !mediaFitContain &&
+                            "max-md:absolute max-md:inset-0 max-md:h-full max-md:w-full max-md:object-cover max-md:object-center",
+                        )}
                       />
                       <PlayDemoButton onPress={() => setDemoPlaying(true)} />
                     </>
@@ -654,7 +676,11 @@ function Card({
                 </div>
               ) : mediaIsVideo ? (
                 <div
-                  className={cn("h-full w-full", landscapeStripMinH)}
+                  className={cn(
+                    "h-full w-full",
+                    "max-md:absolute max-md:inset-0 max-md:min-h-0",
+                    landscapeStripMinH,
+                  )}
                   onClick={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
                   role="presentation"
@@ -677,7 +703,13 @@ function Card({
                 <img
                   src={cardImage.src}
                   alt={cardImage.alt}
-                  className={stripMediaClass}
+                  className={cn(
+                    stripMediaClass,
+                    mediaFitContain &&
+                      "max-md:h-full max-md:max-h-full max-md:w-full max-md:object-contain max-md:object-center",
+                    !mediaFitContain &&
+                      "max-md:absolute max-md:inset-0 max-md:h-full max-md:w-full max-md:object-cover max-md:object-center",
+                  )}
                 />
               )}
             </div>
