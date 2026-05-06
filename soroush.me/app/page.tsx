@@ -68,6 +68,14 @@ export default function HomePage() {
               At this stage, my goal is to build a strong technical foundation and
               gain clarity through hands-on work.
             </p>
+            <p className="text-sm text-neutral-300 md:text-[15px]">
+              <span className="font-semibold uppercase tracking-[0.16em] text-[#93c5fd]">
+                Relevant coursework
+              </span>
+              <span className="mx-1 text-neutral-500">·</span>
+              ECE 108 – Discrete Mathematics &amp; Logic 1, ECE 124 – Digital Circuits &amp;
+              Systems, ECE 140 – Linear Circuits, MATH 119 – Calculus 2 for Engineering.
+            </p>
           </div>
         </div>
       </div>
