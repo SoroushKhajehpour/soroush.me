@@ -6,10 +6,12 @@ export default function ResumePage() {
       <a
         href="/resume.pdf"
         download="Soroush Khajehpour - Resume.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
         className="inline-flex items-center gap-2 p-1.5 text-sm text-gray-400 transition-colors hover:text-white"
       >
         <Download className="size-5 shrink-0 stroke-[1.5]" aria-hidden />
-        Download
+        Download Resume
       </a>
       <iframe
         src="/resume.pdf#toolbar=0&navpanes=0&scrollbar=0&view=Fit"
