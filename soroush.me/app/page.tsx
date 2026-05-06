@@ -38,7 +38,7 @@ export default function HomePage() {
                 href="https://www.uwce.ca/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 no-underline transition-colors hover:text-blue-300"
+                className="text-[#93c5fd] no-underline transition-colors hover:text-[#bfdbfe]"
               >
                 Computer Engineering
               </a>{" "}

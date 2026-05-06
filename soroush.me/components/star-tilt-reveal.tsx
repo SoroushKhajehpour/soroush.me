@@ -46,7 +46,7 @@ export function StarTiltReveal() {
         <div className="flex items-center justify-end gap-2">
           {open && hasLoadedCard && (
             <p className="max-w-[min(220px,55vw)] text-right font-serif text-[12px] leading-snug text-blue-200">
-              You found little me!
+              Surprise!
             </p>
           )}
           <button
@@ -56,7 +56,7 @@ export function StarTiltReveal() {
             aria-label={open ? "Hide photo" : "Show photo"}
             aria-expanded={open}
           >
-            <FaStar className="size-2.5" aria-hidden />
+            <FaStar className="size-2.5 origin-center scale-[0.75]" aria-hidden />
           </button>
         </div>
       </div>
