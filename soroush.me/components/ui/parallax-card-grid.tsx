@@ -113,32 +113,21 @@ function DemoVideoPlayer({
 function PlayDemoButton({
   onPress,
   label = "Demo",
-  tone = "dark",
 }: {
   onPress: () => void;
   label?: string;
-  tone?: "dark" | "light";
 }) {
   return (
     <button
       type="button"
       className={cn(
-        "absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-full px-2 py-1 pl-1.5",
-        "text-[11px] font-normal tracking-wide antialiased",
+        "absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-full",
+        "border border-white/15 bg-neutral-950/30 px-2 py-1 pl-1.5",
+        "text-[11px] font-normal tracking-wide text-white/80 antialiased",
         "backdrop-blur-md backdrop-saturate-150",
         "transition-[border-color,background-color,color] duration-200 ease-out",
-        "focus:outline-none focus-visible:ring-1",
-        tone === "light"
-          ? cn(
-              "border border-neutral-300/90 bg-white/90 text-neutral-800",
-              "hover:border-neutral-400 hover:bg-white hover:text-neutral-950",
-              "focus-visible:border-neutral-400 focus-visible:ring-neutral-400/35",
-            )
-          : cn(
-              "border border-white/15 bg-neutral-950/30 text-white/80",
-              "hover:border-white/25 hover:bg-neutral-950/45 hover:text-white",
-              "focus-visible:border-white/35 focus-visible:ring-white/20",
-            ),
+        "hover:border-white/25 hover:bg-neutral-950/45 hover:text-white",
+        "focus:outline-none focus-visible:border-white/35 focus-visible:ring-1 focus-visible:ring-white/20",
       )}
       aria-label="Play demo video"
       onClick={(e) => {
@@ -659,9 +648,11 @@ function Card({
                 demoSlotLight && hasDemoVideo
                   ? "border-t border-neutral-200/90 md:border-neutral-200/90"
                   : "border-t border-white/10",
-                demoMediaFixedStrip
-                  ? "self-stretch md:h-[220px] md:min-h-[220px] md:max-h-[220px] md:shrink-0 md:self-center"
-                  : "self-stretch",
+                demoMediaFixedStrip && demoSlotLight
+                  ? "self-stretch min-h-[220px]"
+                  : demoMediaFixedStrip
+                    ? "self-stretch md:h-[220px] md:min-h-[220px] md:max-h-[220px] md:shrink-0 md:self-center"
+                    : "self-stretch",
                 hasDemoVideo
                   ? cn(
                       "max-md:aspect-video max-md:w-full",
@@ -685,7 +676,7 @@ function Card({
                           demoSlotLight ? "bg-white" : "bg-[#2a2a2a]",
                         )
                       : "h-full min-h-0",
-                    landscapeStripMinH,
+                    !(demoSlotLight && hasDemoVideo) && landscapeStripMinH,
                   )}
                 >
                   {demoPlaying && cardImage.demoVideoSrc ? (
@@ -725,7 +716,6 @@ function Card({
                       <PlayDemoButton
                         onPress={() => setDemoPlaying(true)}
                         label={cardImage.demoButtonLabel}
-                        tone={demoSlotLight ? "light" : "dark"}
                       />
                     </>
                   )}
@@ -825,7 +815,6 @@ function Card({
                       <PlayDemoButton
                         onPress={() => setDemoPlaying(true)}
                         label={cardImage.demoButtonLabel}
-                        tone={demoSlotLight ? "light" : "dark"}
                       />
                     </div>
                   )}

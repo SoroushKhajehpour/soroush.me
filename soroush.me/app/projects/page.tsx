@@ -29,7 +29,6 @@ const PROJECTS: ParallaxCardItem[] = [
       src: "/chefit_project_pic.png",
       alt: "ChefIt",
       demoVideoSrc: "/chefitdemo.mp4",
-      demoButtonLabel: "Play demo",
       demoObjectFit: "contain",
       demoSlotBg: "light",
     },
