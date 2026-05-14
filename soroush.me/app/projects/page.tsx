@@ -26,6 +26,18 @@ const PROJECTS: ParallaxCardItem[] = [
   },
   {
     image: {
+      src: "/chefit_project_pic.png",
+      alt: "ChefIt",
+      demoVideoSrc: "/chefitdemo.mov",
+      demoButtonLabel: "Play demo",
+    },
+    title: "ChefIt",
+    titleHref: "https://github.com/MatthewKim07/chef-it",
+    description:
+      "ChefIt helps people decide what to cook using ingredients they already have at home. Users can scan their fridge or pantry with a photo, and the app identifies ingredients and recommends matching recipes. It also helps reduce food waste by suggesting meals before ingredients go unused. The app includes recipe discovery, ingredient tracking, favorites, shopping lists, guided cooking, and a social feed where users can share dishes and recipes.",
+  },
+  {
+    image: {
       src: "/polyscope.png",
       alt: "Polyscope",
       demoVideoSrc: "/polyscope.mp4",

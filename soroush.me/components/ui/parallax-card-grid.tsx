@@ -14,7 +14,7 @@ import { FaGithub } from "react-icons/fa6";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-const VIDEO_SRC_RE = /\.(mp4|webm|ogg)(\?|$)/i;
+const VIDEO_SRC_RE = /\.(mp4|webm|ogg|mov)(\?|$)/i;
 
 function isVideoSrc(src: string) {
   return VIDEO_SRC_RE.test(src);
@@ -110,7 +110,13 @@ function DemoVideoPlayer({
   );
 }
 
-function PlayDemoButton({ onPress }: { onPress: () => void }) {
+function PlayDemoButton({
+  onPress,
+  label = "Demo",
+}: {
+  onPress: () => void;
+  label?: string;
+}) {
   return (
     <button
       type="button"
@@ -134,7 +140,7 @@ function PlayDemoButton({ onPress }: { onPress: () => void }) {
         strokeWidth={1.65}
         aria-hidden
       />
-      <span className="pr-1">Demo</span>
+      <span className="pr-1">{label}</span>
     </button>
   );
 }
@@ -147,6 +153,8 @@ export type ParallaxCardItem = {
     poster?: string;
     /** Shows `src` as image until clicked; then plays this clip (first ~1s skipped during playback). */
     demoVideoSrc?: string;
+    /** Text next to the play icon on the poster (default `Demo`). */
+    demoButtonLabel?: string;
     /**
      * `cover` fills the strip (default — no empty bands). Use `contain` only if you want the whole screenshot visible with letterboxing.
      */
@@ -673,7 +681,10 @@ function Card({
                             "max-md:absolute max-md:inset-0 max-md:h-full max-md:w-full max-md:object-cover max-md:object-center",
                         )}
                       />
-                      <PlayDemoButton onPress={() => setDemoPlaying(true)} />
+                      <PlayDemoButton
+                        onPress={() => setDemoPlaying(true)}
+                        label={cardImage.demoButtonLabel}
+                      />
                     </>
                   )}
                 </div>
@@ -762,7 +773,10 @@ function Card({
                             : "h-full w-full object-cover object-center"
                         }
                       />
-                      <PlayDemoButton onPress={() => setDemoPlaying(true)} />
+                      <PlayDemoButton
+                        onPress={() => setDemoPlaying(true)}
+                        label={cardImage.demoButtonLabel}
+                      />
                     </div>
                   )}
                   {enableGlare && (
