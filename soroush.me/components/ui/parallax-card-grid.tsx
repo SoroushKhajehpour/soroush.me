@@ -84,7 +84,9 @@ function DemoVideoPlayer({
       aria-label={ariaLabel}
       onPlay={(e) => {
         const v = e.currentTarget;
-        if (v.currentTime < DEMO_TRIM_START_SEC - 0.05) {
+        // Only treat as “start from head” when still on the first frame — avoids fighting
+        // iOS scrub/resume where currentTime sits in the trimmed window but is intentional.
+        if (v.currentTime < 0.03) {
           v.currentTime = DEMO_TRIM_START_SEC;
         }
       }}
@@ -100,6 +102,7 @@ function DemoVideoPlayer({
         const d = v.duration;
         if (
           !v.paused &&
+          !v.seeking &&
           Number.isFinite(d) &&
           d > DEMO_TRIM_START_SEC + DEMO_END_ADVANCE_SEC &&
           v.currentTime >= d - DEMO_END_ADVANCE_SEC
@@ -401,6 +404,18 @@ function Card({
    */
   const unclipDemoVideoControlsMobile = hasDemoVideo && demoPlaying;
 
+  const [isMobileViewport, setIsMobileViewport] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobileViewport(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  /** iOS: 3D transforms on ancestors break native `<video controls>` hit-testing. */
+  const freezeMotionForMobileDemo =
+    hasDemoVideo && demoPlaying && isMobileViewport;
+
   const demoFitContain = hasDemoVideo && cardImage.demoObjectFit === "contain";
   const demoSlotLight = hasDemoVideo && cardImage.demoSlotBg === "light";
 
@@ -470,7 +485,10 @@ function Card({
 
   return (
     <motion.div
-      style={{ perspective: "1000px", transformStyle: "preserve-3d" }}
+      style={{
+        perspective: freezeMotionForMobileDemo ? "none" : "1000px",
+        transformStyle: freezeMotionForMobileDemo ? "flat" : "preserve-3d",
+      }}
       {...revealProps}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => {
@@ -507,7 +525,7 @@ function Card({
           overflow: "visible",
           cursor: "default",
           position: "relative",
-          transformStyle: "preserve-3d",
+          transformStyle: freezeMotionForMobileDemo ? "flat" : "preserve-3d",
           backgroundColor: "transparent",
         }}
         animate={
@@ -519,13 +537,21 @@ function Card({
                     ? `0 20px 40px rgba(0, 0, 0, ${shadowStrength * 1.8})`
                     : `0 8px 24px rgba(0, 0, 0, ${shadowStrength})`,
                 }
-              : {
-                  rotateX: tiltX,
-                  rotateY: tiltY,
-                  boxShadow: isHovered
-                    ? `0 ${20 + tiltDepth}px ${40 + tiltDepth * 2}px rgba(0, 0, 0, ${shadowStrength * 1.5})`
-                    : `0 8px 24px rgba(0, 0, 0, ${shadowStrength})`,
-                }
+              : freezeMotionForMobileDemo
+                ? {
+                    rotateX: 0,
+                    rotateY: 0,
+                    boxShadow: isHovered
+                      ? `0 ${20 + tiltDepth}px ${40 + tiltDepth * 2}px rgba(0, 0, 0, ${shadowStrength * 1.5})`
+                      : `0 8px 24px rgba(0, 0, 0, ${shadowStrength})`,
+                  }
+                : {
+                    rotateX: tiltX,
+                    rotateY: tiltY,
+                    boxShadow: isHovered
+                      ? `0 ${20 + tiltDepth}px ${40 + tiltDepth * 2}px rgba(0, 0, 0, ${shadowStrength * 1.5})`
+                      : `0 8px 24px rgba(0, 0, 0, ${shadowStrength})`,
+                  }
             : {}
         }
         transition={{
@@ -543,7 +569,9 @@ function Card({
           style={{
             borderRadius: `${borderRadius}px`,
             backgroundColor: theme === "dark" ? "#2a2a2a" : "#ffffff",
-            transform: "translateZ(0)",
+            ...(freezeMotionForMobileDemo
+              ? {}
+              : { transform: "translateZ(0)" }),
           }}
         >
         {landscape ? (
@@ -725,8 +753,13 @@ function Card({
                             )
                           : "bg-transparent",
                       )}
-                      onClick={(e) => e.stopPropagation()}
-                      onPointerDown={(e) => e.stopPropagation()}
+                      {...(isMobileViewport
+                        ? {}
+                        : {
+                            onClick: (e: React.MouseEvent) => e.stopPropagation(),
+                            onPointerDown: (e: React.PointerEvent) =>
+                              e.stopPropagation(),
+                          })}
                       role="presentation"
                     >
                       <DemoVideoPlayer
@@ -817,8 +850,13 @@ function Card({
                             demoSlotLight ? "bg-white" : "bg-[#2a2a2a]",
                           ),
                       )}
-                      onClick={(e) => e.stopPropagation()}
-                      onPointerDown={(e) => e.stopPropagation()}
+                      {...(isMobileViewport
+                        ? {}
+                        : {
+                            onClick: (e: React.MouseEvent) => e.stopPropagation(),
+                            onPointerDown: (e: React.PointerEvent) =>
+                              e.stopPropagation(),
+                          })}
                       role="presentation"
                     >
                       <DemoVideoPlayer
