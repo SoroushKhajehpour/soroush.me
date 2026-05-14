@@ -545,7 +545,8 @@ function Card({
           >
             <div
               className={cn(
-                "relative flex min-h-0 min-w-0 flex-1 flex-col max-md:pb-3 md:pr-3",
+                "relative flex min-h-0 min-w-0 flex-1 flex-col max-md:pb-3",
+                demoSlotLight && hasDemoVideo ? "md:pr-0" : "md:pr-3",
                 singleWide
                   ? comfortableRow
                     ? "justify-start gap-2 px-4 py-4 md:px-5 md:py-6"
@@ -644,10 +645,10 @@ function Card({
             </div>
             <div
               className={cn(
-                "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center overflow-hidden md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
+                "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center overflow-hidden md:w-[min(42%,250px)] md:min-w-[180px]",
                 demoSlotLight && hasDemoVideo
-                  ? "border-t border-neutral-200/90 md:border-neutral-200/90"
-                  : "border-t border-white/10",
+                  ? "border-t border-neutral-200/90 md:border-l-0 md:border-t-0"
+                  : "border-t border-white/10 md:border-l md:border-t-0",
                 demoMediaFixedStrip && demoSlotLight
                   ? "self-stretch min-h-[220px]"
                   : demoMediaFixedStrip
@@ -669,26 +670,26 @@ function Card({
               {hasDemoVideo ? (
                 <div
                   className={cn(
-                    "relative min-h-0 w-full flex-1 overflow-hidden",
+                    "relative min-h-0 h-full w-full flex-1 overflow-hidden",
                     demoFitContain
                       ? cn(
-                          "flex h-full min-h-0 items-center justify-center",
+                          "flex min-h-0 items-center justify-center",
                           demoSlotLight ? "bg-white" : "bg-[#2a2a2a]",
                         )
-                      : "h-full min-h-0",
+                      : "min-h-0",
                     !(demoSlotLight && hasDemoVideo) && landscapeStripMinH,
                   )}
                 >
                   {demoPlaying && cardImage.demoVideoSrc ? (
                     <div
                       className={cn(
-                        "min-h-0 w-full overflow-hidden",
+                        "absolute inset-0 z-[1] min-h-0 w-full overflow-hidden",
                         demoFitContain
                           ? cn(
-                              "flex h-full max-h-full items-center justify-center",
+                              "flex items-center justify-center",
                               demoSlotLight ? "bg-white" : "bg-[#2a2a2a]",
                             )
-                          : "absolute inset-0 h-full max-h-full",
+                          : "bg-transparent",
                       )}
                       onClick={(e) => e.stopPropagation()}
                       onPointerDown={(e) => e.stopPropagation()}
@@ -699,7 +700,7 @@ function Card({
                         ariaLabel={cardImage.alt}
                         className={
                           demoFitContain
-                            ? "max-h-full max-w-full object-contain object-center"
+                            ? "max-h-full max-w-full shrink object-contain object-center"
                             : "h-full w-full max-h-full object-cover object-center"
                         }
                         onPlaybackComplete={() => setDemoPlaying(false)}
