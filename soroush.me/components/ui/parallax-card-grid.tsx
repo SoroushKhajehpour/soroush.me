@@ -708,6 +708,9 @@ function Card({
                         )
                       : "min-h-0",
                     !(demoSlotLight && hasDemoVideo) && landscapeStripMinH,
+                    // Dark-slot demos: strip min-h matches md fixed height but can exceed
+                    // max-md aspect-video, so flex center + overflow clips the Demo control.
+                    hasDemoVideo && "max-md:!min-h-0",
                   )}
                 >
                   {demoPlaying && cardImage.demoVideoSrc ? (

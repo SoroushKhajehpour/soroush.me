@@ -1,0 +1,12 @@
+---
+description: Git commits must not add Co-authored-by or other trailers
+alwaysApply: true
+---
+
+# Git commits: no trailers
+
+When creating commits in this repo (shell or instructions):
+
+- Use only a single-line subject when possible, e.g. `git commit -m "fix(scope): summary"`.
+- Do **not** pass `git commit --trailer` (any trailer).
+- Do **not** add `Co-authored-by:` or similar lines to the commit message body.
