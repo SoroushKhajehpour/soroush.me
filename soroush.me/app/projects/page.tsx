@@ -30,6 +30,8 @@ const PROJECTS: ParallaxCardItem[] = [
       alt: "ChefIt",
       demoVideoSrc: "/chefitdemo.mp4",
       demoButtonLabel: "Play demo",
+      demoObjectFit: "contain",
+      demoSlotBg: "light",
     },
     title: "ChefIt",
     titleHref: "https://github.com/MatthewKim07/chef-it",

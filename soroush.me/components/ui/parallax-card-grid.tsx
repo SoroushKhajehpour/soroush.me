@@ -113,21 +113,32 @@ function DemoVideoPlayer({
 function PlayDemoButton({
   onPress,
   label = "Demo",
+  tone = "dark",
 }: {
   onPress: () => void;
   label?: string;
+  tone?: "dark" | "light";
 }) {
   return (
     <button
       type="button"
       className={cn(
-        "absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-full",
-        "border border-white/15 bg-neutral-950/30 px-2 py-1 pl-1.5",
-        "text-[11px] font-normal tracking-wide text-white/80 antialiased",
+        "absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-full px-2 py-1 pl-1.5",
+        "text-[11px] font-normal tracking-wide antialiased",
         "backdrop-blur-md backdrop-saturate-150",
         "transition-[border-color,background-color,color] duration-200 ease-out",
-        "hover:border-white/25 hover:bg-neutral-950/45 hover:text-white",
-        "focus:outline-none focus-visible:border-white/35 focus-visible:ring-1 focus-visible:ring-white/20",
+        "focus:outline-none focus-visible:ring-1",
+        tone === "light"
+          ? cn(
+              "border border-neutral-300/90 bg-white/90 text-neutral-800",
+              "hover:border-neutral-400 hover:bg-white hover:text-neutral-950",
+              "focus-visible:border-neutral-400 focus-visible:ring-neutral-400/35",
+            )
+          : cn(
+              "border border-white/15 bg-neutral-950/30 text-white/80",
+              "hover:border-white/25 hover:bg-neutral-950/45 hover:text-white",
+              "focus-visible:border-white/35 focus-visible:ring-white/20",
+            ),
       )}
       aria-label="Play demo video"
       onClick={(e) => {
@@ -159,6 +170,10 @@ export type ParallaxCardItem = {
      * `cover` fills the strip (default — no empty bands). Use `contain` only if you want the whole screenshot visible with letterboxing.
      */
     mediaFit?: "cover" | "contain";
+    /** How the inline demo clip fits. `contain` = full frame, no crop (letterboxing). Default `cover`. */
+    demoObjectFit?: "cover" | "contain";
+    /** Slot / letterbox behind demo (`contain`). `light` = white (e.g. phone chrome). */
+    demoSlotBg?: "dark" | "light";
   };
   title: string;
   /** If set, `title` is rendered as a link (e.g. company name). */
@@ -384,6 +399,9 @@ function Card({
   const mediaIsVideo = isVideoSrc(cardImage.src) && !hasDemoVideo;
   /** Fixed-height strip on md+ so demo playback cannot grow the row or trigger equal-height bugs. */
   const demoMediaFixedStrip = hasDemoVideo && singleWide && landscape;
+
+  const demoFitContain = hasDemoVideo && cardImage.demoObjectFit === "contain";
+  const demoSlotLight = hasDemoVideo && cardImage.demoSlotBg === "light";
 
   const mediaFitContain = cardImage.mediaFit === "contain";
   const stripMediaClass = mediaFitContain
@@ -637,19 +655,23 @@ function Card({
             </div>
             <div
               className={cn(
-                "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center overflow-hidden border-t border-white/10 md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
+                "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center overflow-hidden md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
+                demoSlotLight && hasDemoVideo
+                  ? "border-t border-neutral-200/90 md:border-neutral-200/90"
+                  : "border-t border-white/10",
                 demoMediaFixedStrip
                   ? "self-stretch md:h-[220px] md:min-h-[220px] md:max-h-[220px] md:shrink-0 md:self-center"
                   : "self-stretch",
-                mediaFitContain
+                hasDemoVideo
                   ? cn(
-                      "max-md:py-2 max-md:min-h-0!",
-                      hasDemoVideo
-                        ? "max-md:min-h-[min(48vw,220px)] max-md:max-h-[min(52dvh,400px)]"
-                        : "max-md:max-h-[100px]",
+                      "max-md:aspect-video max-md:w-full",
+                      demoSlotLight && "bg-white",
+                      demoFitContain && !demoSlotLight && "bg-[#2a2a2a]",
                     )
-                  : "max-md:aspect-video max-md:w-full",
-                mediaFitContain && "bg-[#2a2a2a]",
+                  : mediaFitContain
+                    ? cn("max-md:py-2 max-md:min-h-0!", "max-md:max-h-[100px]")
+                    : "max-md:aspect-video max-md:w-full",
+                !hasDemoVideo && mediaFitContain && "bg-[#2a2a2a]",
                 !demoMediaFixedStrip && landscapeStripMinH,
               )}
             >
@@ -657,8 +679,11 @@ function Card({
                 <div
                   className={cn(
                     "relative min-h-0 w-full flex-1 overflow-hidden",
-                    mediaFitContain
-                      ? "flex h-full min-h-0 items-center justify-center p-2 sm:p-2.5"
+                    demoFitContain
+                      ? cn(
+                          "flex h-full min-h-0 items-center justify-center",
+                          demoSlotLight ? "bg-white" : "bg-[#2a2a2a]",
+                        )
                       : "h-full min-h-0",
                     landscapeStripMinH,
                   )}
@@ -667,8 +692,11 @@ function Card({
                     <div
                       className={cn(
                         "min-h-0 w-full overflow-hidden",
-                        mediaFitContain
-                          ? "flex h-full max-h-full items-center justify-center"
+                        demoFitContain
+                          ? cn(
+                              "flex h-full max-h-full items-center justify-center",
+                              demoSlotLight ? "bg-white" : "bg-[#2a2a2a]",
+                            )
                           : "absolute inset-0 h-full max-h-full",
                       )}
                       onClick={(e) => e.stopPropagation()}
@@ -679,7 +707,7 @@ function Card({
                         src={cardImage.demoVideoSrc}
                         ariaLabel={cardImage.alt}
                         className={
-                          mediaFitContain
+                          demoFitContain
                             ? "max-h-full max-w-full object-contain object-center"
                             : "h-full w-full max-h-full object-cover object-center"
                         }
@@ -692,15 +720,12 @@ function Card({
                       <img
                         src={cardImage.src}
                         alt={cardImage.alt}
-                        className={
-                          mediaFitContain
-                            ? stripMediaClass
-                            : "absolute inset-0 h-full w-full object-cover object-center"
-                        }
+                        className="absolute inset-0 h-full w-full object-cover object-center"
                       />
                       <PlayDemoButton
                         onPress={() => setDemoPlaying(true)}
                         label={cardImage.demoButtonLabel}
+                        tone={demoSlotLight ? "light" : "dark"}
                       />
                     </>
                   )}
@@ -747,15 +772,23 @@ function Card({
           </div>
         ) : (
           <>
-            <div className="relative h-[60%] w-full overflow-hidden bg-neutral-950">
+            <div
+              className={cn(
+                "relative h-[60%] w-full overflow-hidden",
+                hasDemoVideo && demoSlotLight ? "bg-white" : "bg-neutral-950",
+              )}
+            >
               {hasDemoVideo ? (
                 <>
                   {demoPlaying && cardImage.demoVideoSrc ? (
                     <div
                       className={cn(
                         "absolute inset-0",
-                        mediaFitContain &&
-                          "flex items-center justify-center bg-[#2a2a2a] p-2 sm:p-3",
+                        demoFitContain &&
+                          cn(
+                            "flex items-center justify-center",
+                            demoSlotLight ? "bg-white" : "bg-[#2a2a2a]",
+                          ),
                       )}
                       onClick={(e) => e.stopPropagation()}
                       onPointerDown={(e) => e.stopPropagation()}
@@ -765,7 +798,7 @@ function Card({
                         src={cardImage.demoVideoSrc}
                         ariaLabel={cardImage.alt}
                         className={
-                          mediaFitContain
+                          demoFitContain
                             ? "max-h-full max-w-full object-contain object-center"
                             : "h-full w-full object-cover object-center"
                         }
@@ -776,23 +809,23 @@ function Card({
                     <div
                       className={cn(
                         "relative h-full w-full",
-                        mediaFitContain &&
-                          "flex items-center justify-center bg-[#2a2a2a] p-2 sm:p-3",
+                        demoFitContain &&
+                          cn(
+                            "flex items-center justify-center",
+                            demoSlotLight ? "bg-white" : "bg-[#2a2a2a]",
+                          ),
                       )}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={cardImage.src}
                         alt={cardImage.alt}
-                        className={
-                          mediaFitContain
-                            ? "max-h-full max-w-full object-contain object-center"
-                            : "h-full w-full object-cover object-center"
-                        }
+                        className="absolute inset-0 h-full w-full object-cover object-center"
                       />
                       <PlayDemoButton
                         onPress={() => setDemoPlaying(true)}
                         label={cardImage.demoButtonLabel}
+                        tone={demoSlotLight ? "light" : "dark"}
                       />
                     </div>
                   )}
