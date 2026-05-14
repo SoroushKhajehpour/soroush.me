@@ -30,7 +30,6 @@ const PROJECTS: ParallaxCardItem[] = [
       alt: "ChefIt",
       demoVideoSrc: "/chefitdemo.mp4",
       demoButtonLabel: "Play demo",
-      mediaFit: "contain",
     },
     title: "ChefIt",
     titleHref: "https://github.com/MatthewKim07/chef-it",
@@ -60,7 +59,6 @@ export default function ProjectsPage() {
         gap={32}
         singleWide
         comfortableSingleWide
-        equalizeSingleWideHeights
       />
     </section>
   );

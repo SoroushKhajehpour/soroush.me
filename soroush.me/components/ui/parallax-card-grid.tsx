@@ -382,6 +382,8 @@ function Card({
     Boolean(cardImage.demoVideoSrc) && isVideoSrc(cardImage.demoVideoSrc ?? "");
   const [demoPlaying, setDemoPlaying] = React.useState(false);
   const mediaIsVideo = isVideoSrc(cardImage.src) && !hasDemoVideo;
+  /** Fixed-height strip on md+ so demo playback cannot grow the row or trigger equal-height bugs. */
+  const demoMediaFixedStrip = hasDemoVideo && singleWide && landscape;
 
   const mediaFitContain = cardImage.mediaFit === "contain";
   const stripMediaClass = mediaFitContain
@@ -635,7 +637,10 @@ function Card({
             </div>
             <div
               className={cn(
-                "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center self-stretch overflow-hidden border-t border-white/10 md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
+                "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center overflow-hidden border-t border-white/10 md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
+                demoMediaFixedStrip
+                  ? "self-stretch md:h-[220px] md:min-h-[220px] md:max-h-[220px] md:shrink-0 md:self-center"
+                  : "self-stretch",
                 mediaFitContain
                   ? cn(
                       "max-md:py-2 max-md:min-h-0!",
@@ -645,7 +650,7 @@ function Card({
                     )
                   : "max-md:aspect-video max-md:w-full",
                 mediaFitContain && "bg-[#2a2a2a]",
-                landscapeStripMinH,
+                !demoMediaFixedStrip && landscapeStripMinH,
               )}
             >
               {hasDemoVideo ? (
