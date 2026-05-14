@@ -60,6 +60,7 @@ export default function ProjectsPage() {
         gap={32}
         singleWide
         comfortableSingleWide
+        equalizeSingleWideHeights
       />
     </section>
   );
