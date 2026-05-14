@@ -106,6 +106,7 @@ function DemoVideoPlayer({
         }
       }}
       onEnded={finishDemo}
+      onError={finishDemo}
     />
   );
 }
@@ -172,6 +173,10 @@ export type ParallaxCardItem = {
   /** Shown right-aligned on the title row (e.g. year). */
   year?: string;
   description: string;
+  /**
+   * When `singleWide` + landscape, merged onto this card’s row wrapper (e.g. max-height + overflow) without affecting other cards.
+   */
+  singleWideRowClassName?: string;
   tag?: string;
   linkLabel?: string;
   linkUrl?: string;
@@ -401,6 +406,8 @@ function Card({
   const isYearRange = card.year?.includes("-") ?? false;
 
   const comfortableRow = comfortableSingleWide && singleWide;
+  const rowClamp =
+    Boolean(singleWide && landscape && card.singleWideRowClassName?.trim());
   const landscapeStripMinH = singleWide
     ? uniformLandscapeMinHeight != null
       ? "min-h-0"
@@ -536,6 +543,8 @@ function Card({
               "flex w-full flex-col items-stretch md:flex-row",
               singleWide ? "min-h-0" : "h-full",
               rowMinUntilUniform,
+              rowClamp && "min-h-0",
+              card.singleWideRowClassName,
             )}
             style={
               singleWide && uniformLandscapeMinHeight != null
@@ -546,6 +555,7 @@ function Card({
             <div
               className={cn(
                 "relative flex min-h-0 min-w-0 flex-1 flex-col max-md:pb-3",
+                rowClamp && "overflow-hidden",
                 demoSlotLight && hasDemoVideo ? "md:pr-0" : "md:pr-3",
                 singleWide
                   ? comfortableRow
@@ -565,10 +575,16 @@ function Card({
               <div
                 className={cn(
                   "relative z-1 flex min-h-0 min-w-0 flex-1 flex-col",
+                  rowClamp && "min-h-0 overflow-hidden",
                   gitHubHref && "max-md:pr-11",
                 )}
               >
-                <div className="min-h-0 flex-1">
+                <div
+                  className={cn(
+                    "min-h-0 flex-1",
+                    rowClamp && "min-h-0 overflow-y-auto overscroll-y-contain",
+                  )}
+                >
                   <div>
                     <h3
                       className={cn(
@@ -646,6 +662,7 @@ function Card({
             <div
               className={cn(
                 "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center overflow-hidden md:w-[min(42%,250px)] md:min-w-[180px]",
+                rowClamp && "min-h-0 md:min-h-0",
                 demoSlotLight && hasDemoVideo
                   ? "border-t border-neutral-200/90 md:border-l-0 md:border-t-0"
                   : "border-t border-white/10 md:border-l md:border-t-0",

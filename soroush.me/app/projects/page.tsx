@@ -34,6 +34,8 @@ const PROJECTS: ParallaxCardItem[] = [
     },
     title: "ChefIt",
     titleHref: "https://github.com/MatthewKim07/chef-it",
+    singleWideRowClassName:
+      "max-md:max-h-[min(72dvh,38rem)] md:max-h-[26rem] overflow-hidden",
     description:
       "ChefIt helps you figure out what to cook using what you already have. It scans your fridge or pantry from a single photo, detects ingredients, and suggests recipes you can actually make without another grocery run. A matching system ranks recipes based on what you own and fills in gaps with a built-in shopping list, alongside step-by-step cooking and saved recipes. Built end-to-end in 24 hours at ConHacks 2026.",
   },
@@ -60,7 +62,6 @@ export default function ProjectsPage() {
         gap={32}
         singleWide
         comfortableSingleWide
-        equalizeSingleWideHeights
       />
     </section>
   );
