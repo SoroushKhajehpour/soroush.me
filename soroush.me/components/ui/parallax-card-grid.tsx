@@ -633,7 +633,7 @@ function Card({
             </div>
             <div
               className={cn(
-                "relative flex w-full min-w-0 shrink-0 flex-col justify-center self-stretch overflow-hidden border-t border-white/10 md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
+                "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center self-stretch overflow-hidden border-t border-white/10 md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
                 mediaFitContain
                   ? "max-md:max-h-[100px] max-md:py-2 max-md:min-h-0!"
                   : "max-md:aspect-video max-md:w-full",
@@ -644,19 +644,20 @@ function Card({
               {hasDemoVideo ? (
                 <div
                   className={cn(
-                    "relative h-full min-h-0 w-full flex-1",
-                    mediaFitContain &&
-                      "flex items-center justify-center p-2 sm:p-2.5",
-                    !mediaFitContain && "max-md:flex max-md:min-h-0 max-md:flex-1",
+                    "relative min-h-0 w-full flex-1 overflow-hidden",
+                    mediaFitContain
+                      ? "flex h-full min-h-0 items-center justify-center p-2 sm:p-2.5"
+                      : "h-full min-h-0",
                     landscapeStripMinH,
                   )}
                 >
                   {demoPlaying && cardImage.demoVideoSrc ? (
                     <div
                       className={cn(
-                        "h-full min-h-0 w-full",
-                        !mediaFitContain &&
-                          "max-md:absolute max-md:inset-0 max-md:min-h-0",
+                        "min-h-0 w-full overflow-hidden",
+                        mediaFitContain
+                          ? "flex h-full max-h-full items-center justify-center"
+                          : "absolute inset-0 h-full max-h-full",
                       )}
                       onClick={(e) => e.stopPropagation()}
                       onPointerDown={(e) => e.stopPropagation()}
@@ -665,7 +666,11 @@ function Card({
                       <DemoVideoPlayer
                         src={cardImage.demoVideoSrc}
                         ariaLabel={cardImage.alt}
-                        className={stripMediaClass}
+                        className={
+                          mediaFitContain
+                            ? "max-h-full max-w-full object-contain object-center"
+                            : "h-full w-full max-h-full object-cover object-center"
+                        }
                         onPlaybackComplete={() => setDemoPlaying(false)}
                       />
                     </div>
@@ -675,11 +680,11 @@ function Card({
                       <img
                         src={cardImage.src}
                         alt={cardImage.alt}
-                        className={cn(
-                          stripMediaClass,
-                          !mediaFitContain &&
-                            "max-md:absolute max-md:inset-0 max-md:h-full max-md:w-full max-md:object-cover max-md:object-center",
-                        )}
+                        className={
+                          mediaFitContain
+                            ? stripMediaClass
+                            : "absolute inset-0 h-full w-full object-cover object-center"
+                        }
                       />
                       <PlayDemoButton
                         onPress={() => setDemoPlaying(true)}
