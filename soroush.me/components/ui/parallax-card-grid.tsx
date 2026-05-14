@@ -88,10 +88,12 @@ function DemoVideoPlayer({
           v.currentTime = DEMO_TRIM_START_SEC;
         }
       }}
-      onSeeking={(e) => {
+      onSeeked={(e) => {
         const v = e.currentTarget;
-        if (v.currentTime < DEMO_TRIM_START_SEC)
+        // Clamp after a seek completes — `onSeeking` fights native scrubbers on mobile.
+        if (v.currentTime < DEMO_TRIM_START_SEC - 0.02) {
           v.currentTime = DEMO_TRIM_START_SEC;
+        }
       }}
       onTimeUpdate={(e) => {
         const v = e.currentTarget;
@@ -393,6 +395,11 @@ function Card({
   const mediaIsVideo = isVideoSrc(cardImage.src) && !hasDemoVideo;
   /** Fixed-height strip on md+ so demo playback cannot grow the row or trigger equal-height bugs. */
   const demoMediaFixedStrip = hasDemoVideo && singleWide && landscape;
+  /**
+   * iOS Safari clips native `<video controls>` when nested under `overflow-hidden`, which makes
+   * the scrubber effectively dead on touch. Relax clipping on small viewports only while playing.
+   */
+  const unclipDemoVideoControlsMobile = hasDemoVideo && demoPlaying;
 
   const demoFitContain = hasDemoVideo && cardImage.demoObjectFit === "contain";
   const demoSlotLight = hasDemoVideo && cardImage.demoSlotBg === "light";
@@ -529,7 +536,10 @@ function Card({
         }}
       >
         <div
-          className="h-full min-h-0 overflow-hidden"
+          className={cn(
+            "h-full min-h-0 overflow-hidden",
+            unclipDemoVideoControlsMobile && "max-md:!overflow-visible",
+          )}
           style={{
             borderRadius: `${borderRadius}px`,
             backgroundColor: theme === "dark" ? "#2a2a2a" : "#ffffff",
@@ -545,6 +555,7 @@ function Card({
               rowMinUntilUniform,
               rowClamp && "min-h-0",
               card.singleWideRowClassName,
+              unclipDemoVideoControlsMobile && "max-md:!overflow-visible",
             )}
             style={
               singleWide && uniformLandscapeMinHeight != null
@@ -662,6 +673,7 @@ function Card({
             <div
               className={cn(
                 "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center overflow-hidden md:w-[min(42%,250px)] md:min-w-[180px]",
+                unclipDemoVideoControlsMobile && "max-md:!overflow-visible",
                 rowClamp && "min-h-0 md:min-h-0",
                 demoSlotLight && hasDemoVideo
                   ? "border-t border-neutral-200/90 md:border-l-0 md:border-t-0"
@@ -688,6 +700,7 @@ function Card({
                 <div
                   className={cn(
                     "relative min-h-0 h-full w-full flex-1 overflow-hidden",
+                    unclipDemoVideoControlsMobile && "max-md:!overflow-visible",
                     demoFitContain
                       ? cn(
                           "flex min-h-0 items-center justify-center",
@@ -700,7 +713,8 @@ function Card({
                   {demoPlaying && cardImage.demoVideoSrc ? (
                     <div
                       className={cn(
-                        "absolute inset-0 z-[1] min-h-0 w-full overflow-hidden",
+                        "absolute inset-0 z-[1] min-h-0 w-full overflow-hidden max-md:touch-manipulation",
+                        unclipDemoVideoControlsMobile && "max-md:!overflow-visible",
                         demoFitContain
                           ? cn(
                               "flex items-center justify-center",
@@ -784,6 +798,7 @@ function Card({
               className={cn(
                 "relative h-[60%] w-full overflow-hidden",
                 hasDemoVideo && demoSlotLight ? "bg-white" : "bg-neutral-950",
+                unclipDemoVideoControlsMobile && "max-md:!overflow-visible",
               )}
             >
               {hasDemoVideo ? (
@@ -791,7 +806,8 @@ function Card({
                   {demoPlaying && cardImage.demoVideoSrc ? (
                     <div
                       className={cn(
-                        "absolute inset-0",
+                        "absolute inset-0 max-md:touch-manipulation",
+                        unclipDemoVideoControlsMobile && "max-md:!overflow-visible",
                         demoFitContain &&
                           cn(
                             "flex items-center justify-center",
