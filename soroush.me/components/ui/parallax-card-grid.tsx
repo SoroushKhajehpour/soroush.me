@@ -25,6 +25,20 @@ const DEMO_TRIM_START_SEC = 1;
 /** Finish slightly before true EOF so `ended` / decoder tail latency doesn’t stall the poster swap. */
 const DEMO_END_ADVANCE_SEC = 0.22;
 
+/** Springs overshoot when rotate targets change every `mousemove` — use short tweens for stable tilt. */
+const TILT_MOTION_TRANSITION = {
+  rotateX: { duration: 0.1, ease: "easeOut" as const },
+  rotateY: { duration: 0.1, ease: "easeOut" as const },
+  boxShadow: { duration: 0.18, ease: "easeOut" as const },
+} as const;
+
+const ELEVATE_HOVER_SPRING = {
+  type: "spring" as const,
+  stiffness: 260,
+  damping: 36,
+  mass: 0.85,
+};
+
 function DemoVideoPlayer({
   src,
   ariaLabel,
@@ -447,8 +461,13 @@ function Card({
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!shouldAnimate || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
-    const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+    const halfW = rect.width / 2;
+    const halfH = rect.height / 2;
+    if (halfW <= 0 || halfH <= 0) return;
+    const nx = (e.clientX - rect.left - halfW) / halfW;
+    const ny = (e.clientY - rect.top - halfH) / halfH;
+    const x = Math.max(-1, Math.min(1, nx));
+    const y = Math.max(-1, Math.min(1, ny));
     setMousePosition({ x, y });
   };
 
@@ -554,12 +573,13 @@ function Card({
                   }
             : {}
         }
-        transition={{
-          type: "spring",
-          stiffness: 260,
-          damping: 36,
-          mass: 0.85,
-        }}
+        transition={
+          !shouldAnimate
+            ? undefined
+            : hoverVariant === "cards-elevate-on-hover"
+              ? ELEVATE_HOVER_SPRING
+              : TILT_MOTION_TRANSITION
+        }
       >
         <div
           className={cn(
