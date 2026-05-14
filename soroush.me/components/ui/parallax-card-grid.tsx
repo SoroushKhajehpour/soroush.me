@@ -592,7 +592,9 @@ function Card({
                     <p
                       className={cn(
                         "text-[14px] opacity-70",
-                        singleWide ? "" : "line-clamp-3",
+                        singleWide
+                          ? "text-pretty [overflow-wrap:anywhere] leading-relaxed max-md:leading-snug"
+                          : "line-clamp-3",
                       )}
                       style={{ color: textColor }}
                     >
@@ -635,7 +637,12 @@ function Card({
               className={cn(
                 "relative flex w-full min-w-0 min-h-0 shrink-0 flex-col justify-center self-stretch overflow-hidden border-t border-white/10 md:w-[min(42%,250px)] md:min-w-[180px] md:border-l md:border-t-0",
                 mediaFitContain
-                  ? "max-md:max-h-[100px] max-md:py-2 max-md:min-h-0!"
+                  ? cn(
+                      "max-md:py-2 max-md:min-h-0!",
+                      hasDemoVideo
+                        ? "max-md:min-h-[min(48vw,220px)] max-md:max-h-[min(52dvh,400px)]"
+                        : "max-md:max-h-[100px]",
+                    )
                   : "max-md:aspect-video max-md:w-full",
                 mediaFitContain && "bg-[#2a2a2a]",
                 landscapeStripMinH,

@@ -30,11 +30,12 @@ const PROJECTS: ParallaxCardItem[] = [
       alt: "ChefIt",
       demoVideoSrc: "/chefitdemo.mp4",
       demoButtonLabel: "Play demo",
+      mediaFit: "contain",
     },
     title: "ChefIt",
     titleHref: "https://github.com/MatthewKim07/chef-it",
     description:
-      "Photo-scan pantry items for instant recipe matches and less waste—plus discovery, favorites, lists, and social. Built in 24 hours at ConHacks 2026.",
+      "ChefIt helps you figure out what to cook using what you already have. It scans your fridge or pantry from a single photo, detects ingredients, and suggests recipes you can actually make without another grocery run. A matching system ranks recipes based on what you own and fills in gaps with a built-in shopping list, alongside step-by-step cooking and saved recipes. Built end-to-end in 24 hours at ConHacks 2026.",
   },
   {
     image: {
@@ -51,7 +52,7 @@ const PROJECTS: ParallaxCardItem[] = [
 
 export default function ProjectsPage() {
   return (
-    <section className="mx-auto w-full max-w-3xl md:px-6">
+    <section className="mx-auto w-full max-w-3xl px-4 md:px-6">
       <ParallaxCardGrid
         cards={PROJECTS}
         theme="dark"
