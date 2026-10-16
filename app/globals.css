@@ -52,7 +52,7 @@ body { font-family: Arial, Helvetica, sans-serif; }
 .bio {
   position: absolute; left: max(22px, calc(79 * var(--u))); top: max(70px, calc(141 * var(--u)));
   margin: 0; padding: 0; list-style: none;
-  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-family: var(--font-pixel), "Courier New", monospace; color: #080909;
   font-size: max(13px, calc(29 * var(--u))); font-weight: 500; line-height: max(19px, calc(39 * var(--u))); letter-spacing: 0;
   pointer-events: auto;
 }
