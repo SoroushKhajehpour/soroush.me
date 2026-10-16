@@ -1,1 +1,77 @@
-@import "tailwindcss";
+:root { color-scheme: light; background: #fff; color: #080909; }
+* { box-sizing: border-box; }
+html,body { margin: 0; min-height: 100%; }
+body { font-family: Arial, Helvetica, sans-serif; }
+
+/*
+  The scene is wider (2335 px) than the illustration (1585 px) so it can fill any screen
+  edge to edge. These numbers describe the part of it that is visible, in scene pixels:
+  --x0/--y0 is the window's top-left corner, --ww/--wh its size. The canvas, the still
+  and every object place themselves in that window; lib/coast/scene-manifest.ts reads
+  the same values to size the WebGL buffer.
+*/
+@property --ww { syntax: "<number>"; inherits: true; initial-value: 1585; }
+@property --wh { syntax: "<number>"; inherits: true; initial-value: 992; }
+@property --x0 { syntax: "<number>"; inherits: true; initial-value: 300; }
+@property --y0 { syntax: "<number>"; inherits: true; initial-value: 0; }
+
+.homepage {
+  position: relative; width: 100%; height: 100svh; overflow: hidden; background: #fff;
+  /* Scene pixels per CSS pixel for type, so the lettering keeps the artwork's proportions. */
+  --u: min(100vw / 1585, 100svh / 992);
+  /* Wide screens reveal more sea and sand; narrow ones crop toward the sun and objects.
+     Taller than 2335:992 crops the sky instead. tan(atan2(w, h)) is simply w / h. */
+  --ww: clamp(794, calc(992 * tan(atan2(100vw, 100svh))), 2335);
+  --wh: min(992, calc(2335 / tan(atan2(100vw, 100svh))));
+  --x0: calc(300 + max(0, 1585 - var(--ww)) * 0.9 - max(0, var(--ww) - 1585) * 0.4);
+  --y0: calc(992 - var(--wh));
+}
+.scene-window { position: absolute; inset: 0; overflow: hidden; }
+.scene-canvas,.scene-objects { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scene-canvas { display: block; opacity: 0; transition: opacity 500ms ease; }
+.scene-window[data-sharp="true"] :is(.scene-canvas,.scene-object img) { image-rendering: pixelated; }
+.scene-fallback {
+  position: absolute; display: block; max-width: none; image-rendering: auto;
+  width: calc(2335 / var(--ww) * 100%); height: calc(992 / var(--wh) * 100%);
+  left: calc(var(--x0) / var(--ww) * -100%); top: calc(var(--y0) / var(--wh) * -100%);
+}
+.scene-objects { opacity: 0; pointer-events: none; transition: opacity 500ms ease; }
+[data-ready="true"] .scene-canvas,[data-ready="true"] .scene-objects { opacity: 1; }
+[data-ready="true"] .scene-fallback { visibility: hidden; transition: visibility 0s 500ms; }
+.scene-object { position: absolute; }
+.scene-object img { display: block; width: 100%; height: 100%; image-rendering: auto; }
+.object-action { position: absolute; inset: 0; background: none; border: 0; cursor: pointer; pointer-events: auto; min-height: 44px; }
+.object-action:focus-visible { outline: 3px solid #c25f26; outline-offset: 6px; border-radius: 8px; }
+
+.home-intro { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.name {
+  position: absolute; left: max(20px, calc(74 * var(--u))); top: max(22px, calc(66 * var(--u)));
+  margin: 0; display: flex; align-items: start; gap: calc(39 * var(--u));
+}
+.name img { display: block; height: calc(65 * var(--u)); width: auto; image-rendering: auto; }
+.bio {
+  position: absolute; left: max(22px, calc(79 * var(--u))); top: max(70px, calc(141 * var(--u)));
+  margin: 0; padding: 0; list-style: none;
+  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: max(13px, calc(29 * var(--u))); font-weight: 500; line-height: max(19px, calc(39 * var(--u))); letter-spacing: 0;
+  pointer-events: auto;
+}
+.bio li { position: relative; padding-left: 1.5em; white-space: nowrap; }
+.bio li::before { content: ""; position: absolute; width: .4em; height: .4em; border-radius: 50%; left: .27em; top: .5em; background: currentColor; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* Phones and tall tablets: the introduction stacks above a crop that keeps the sun and both objects. */
+@media (max-width: 700px), (max-aspect-ratio: 4/5) {
+  .homepage { height: auto; min-height: 100svh; overflow: visible; display: flex; flex-direction: column;
+    --ww: 700; --wh: 832; --x0: 1120; --y0: 160; }
+  .home-intro { position: relative; inset: auto; flex: 1; padding: 32px 25px 24px; }
+  .name { position: relative; left: auto; top: auto; flex-wrap: wrap; gap: 8px; }
+  .name img { height: auto; }
+  .name .name-first { width: min(66%, 270px); }
+  .name .name-last { width: min(94%, 385px); }
+  .bio { position: relative; left: auto; top: auto; margin-top: 21px; font-size: 16px; line-height: 1.65; letter-spacing: -.3px; }
+  .bio li { padding-left: 19px; white-space: normal; margin-bottom: 6px; }
+  .bio li::before { width: 6px; height: 6px; left: 1px; top: 10px; }
+  .scene-window { position: relative; inset: auto; flex: none; width: 100%; aspect-ratio: 700 / 832; }
+}
+@media (prefers-reduced-motion: reduce) { .scene-canvas,.scene-objects { transition: none; } }

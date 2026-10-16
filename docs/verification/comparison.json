@@ -1,0 +1,100 @@
+{
+  "reference": {
+    "whole": {
+      "meanAbsoluteChannelError": 2.37165,
+      "maximumChannelError": 255,
+      "exactPixelsPercent": 92.709
+    },
+    "title": {
+      "meanAbsoluteChannelError": 0.30654,
+      "maximumChannelError": 11,
+      "exactPixelsPercent": 79.257
+    },
+    "bio": {
+      "meanAbsoluteChannelError": 37.31938,
+      "maximumChannelError": 255,
+      "exactPixelsPercent": 43.023
+    },
+    "water": {
+      "meanAbsoluteChannelError": 0.0,
+      "maximumChannelError": 0,
+      "exactPixelsPercent": 100.0
+    },
+    "sun": {
+      "meanAbsoluteChannelError": 0.0,
+      "maximumChannelError": 0,
+      "exactPixelsPercent": 100.0
+    },
+    "camera": {
+      "meanAbsoluteChannelError": 1.40649,
+      "maximumChannelError": 6,
+      "exactPixelsPercent": 53.376
+    },
+    "speaker": {
+      "meanAbsoluteChannelError": 1.89231,
+      "maximumChannelError": 6,
+      "exactPixelsPercent": 46.293
+    },
+    "life": {
+      "meanAbsoluteChannelError": 0.73961,
+      "maximumChannelError": 4,
+      "exactPixelsPercent": 69.288
+    },
+    "outsideBio": {
+      "maximumChannelError": 11,
+      "exactPixelsPercent": 95.917
+    }
+  },
+  "shorelineInvariants": [
+    {
+      "seconds": 0.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 0
+    },
+    {
+      "seconds": 1.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 524353
+    },
+    {
+      "seconds": 3.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 589564
+    },
+    {
+      "seconds": 5.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 634109
+    },
+    {
+      "seconds": 8.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 608345
+    },
+    {
+      "seconds": 13.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 600168
+    },
+    {
+      "seconds": 30.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 592924
+    },
+    {
+      "seconds": 60.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 637829
+    },
+    {
+      "seconds": 180.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 598391
+    },
+    {
+      "seconds": 600.0,
+      "maxProtectedChange": 0,
+      "changedWaterPixels": 636224
+    }
+  ]
+}

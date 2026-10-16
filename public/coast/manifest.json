@@ -1,0 +1,46 @@
+{
+  "width": 2335,
+  "height": 992,
+  "horizon": 422,
+  "sourceWidth": 1585,
+  "padLeft": 300,
+  "padRight": 450,
+  "runup": 30,
+  "sourceSha256": "3b6af9e148f48c58428839c2c05007d6ec14854ff03ede996f9b558777bed185",
+  "extractionMaxChannelDifference": 0,
+  "objects": {
+    "camera": {
+      "x": 1187,
+      "y": 765,
+      "width": 240,
+      "height": 128,
+      "src": "/coast/camera.png"
+    },
+    "speaker": {
+      "x": 1515,
+      "y": 651,
+      "width": 279,
+      "height": 196,
+      "src": "/coast/speaker.png"
+    },
+    "life": {
+      "x": 1259,
+      "y": 887,
+      "width": 89,
+      "height": 42,
+      "src": "/coast/life.png"
+    }
+  },
+  "title": {
+    "x": 374,
+    "y": 66,
+    "width": 957,
+    "height": 65
+  },
+  "sun": {
+    "x": 1292,
+    "y": 284,
+    "width": 129,
+    "height": 127
+  }
+}

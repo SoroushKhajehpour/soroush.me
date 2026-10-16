@@ -1,0 +1,38 @@
+{
+  "browser": "155.0.8059.80",
+  "errors": [],
+  "performance": {
+    "time": 10.382899999999998,
+    "seed": 17,
+    "paused": false,
+    "motion": 1,
+    "maxRunup": 22,
+    "environment": {
+      "sunOffset": [
+        0,
+        0
+      ],
+      "sky": [
+        1,
+        1,
+        1
+      ],
+      "water": [
+        1,
+        1,
+        1
+      ],
+      "sand": [
+        1,
+        1,
+        1
+      ],
+      "warmth": 1,
+      "reflection": 1
+    },
+    "frames": 626,
+    "averageFrameMs": 16.71964573268921,
+    "running": true,
+    "reducedMotion": false
+  }
+}
