@@ -1,0 +1,447 @@
+{
+  "master": {
+    "file": "continuous-master.png",
+    "width": 5344,
+    "height": 992,
+    "horizonY": 422
+  },
+  "viewport": {
+    "width": 1744,
+    "height": 992,
+    "ratio": 1.7580645161290323
+  },
+  "mainBackgrounds": {
+    "projects": {
+      "file": "main/projects.png",
+      "worldX": 1914
+    },
+    "experience": {
+      "file": "main/experience.png",
+      "worldX": 3600
+    }
+  },
+  "home": {
+    "worldX": 0,
+    "source": "public/coast/still.png",
+    "sourceCrop": [
+      236,
+      0,
+      1980,
+      992
+    ],
+    "reference": "work/home-current-reference.png",
+    "cleanBridge": "work/home-clean-bridge.png",
+    "skyPreservedExactly": true
+  },
+  "sourcePanoramaOffsetX": 64,
+  "generationNativeResolution": [
+    1536,
+    1024
+  ],
+  "transitionMethod": "Pixel-identical overlapping crops of continuous-master.png; no independently generated in-between skies.",
+  "transitions": [
+    {
+      "name": "home-to-projects",
+      "intermediateFrameCount": 24,
+      "frames": [
+        {
+          "file": "transitions/home-to-projects/00.png",
+          "progress": 0.0,
+          "worldX": 0
+        },
+        {
+          "file": "transitions/home-to-projects/01.png",
+          "progress": 0.04,
+          "worldX": 77
+        },
+        {
+          "file": "transitions/home-to-projects/02.png",
+          "progress": 0.08,
+          "worldX": 153
+        },
+        {
+          "file": "transitions/home-to-projects/03.png",
+          "progress": 0.12,
+          "worldX": 230
+        },
+        {
+          "file": "transitions/home-to-projects/04.png",
+          "progress": 0.16,
+          "worldX": 306
+        },
+        {
+          "file": "transitions/home-to-projects/05.png",
+          "progress": 0.2,
+          "worldX": 383
+        },
+        {
+          "file": "transitions/home-to-projects/06.png",
+          "progress": 0.24,
+          "worldX": 459
+        },
+        {
+          "file": "transitions/home-to-projects/07.png",
+          "progress": 0.28,
+          "worldX": 536
+        },
+        {
+          "file": "transitions/home-to-projects/08.png",
+          "progress": 0.32,
+          "worldX": 612
+        },
+        {
+          "file": "transitions/home-to-projects/09.png",
+          "progress": 0.36,
+          "worldX": 689
+        },
+        {
+          "file": "transitions/home-to-projects/10.png",
+          "progress": 0.4,
+          "worldX": 766
+        },
+        {
+          "file": "transitions/home-to-projects/11.png",
+          "progress": 0.44,
+          "worldX": 842
+        },
+        {
+          "file": "transitions/home-to-projects/12.png",
+          "progress": 0.48,
+          "worldX": 919
+        },
+        {
+          "file": "transitions/home-to-projects/13.png",
+          "progress": 0.52,
+          "worldX": 995
+        },
+        {
+          "file": "transitions/home-to-projects/14.png",
+          "progress": 0.56,
+          "worldX": 1072
+        },
+        {
+          "file": "transitions/home-to-projects/15.png",
+          "progress": 0.6,
+          "worldX": 1148
+        },
+        {
+          "file": "transitions/home-to-projects/16.png",
+          "progress": 0.64,
+          "worldX": 1225
+        },
+        {
+          "file": "transitions/home-to-projects/17.png",
+          "progress": 0.68,
+          "worldX": 1302
+        },
+        {
+          "file": "transitions/home-to-projects/18.png",
+          "progress": 0.72,
+          "worldX": 1378
+        },
+        {
+          "file": "transitions/home-to-projects/19.png",
+          "progress": 0.76,
+          "worldX": 1455
+        },
+        {
+          "file": "transitions/home-to-projects/20.png",
+          "progress": 0.8,
+          "worldX": 1531
+        },
+        {
+          "file": "transitions/home-to-projects/21.png",
+          "progress": 0.84,
+          "worldX": 1608
+        },
+        {
+          "file": "transitions/home-to-projects/22.png",
+          "progress": 0.88,
+          "worldX": 1684
+        },
+        {
+          "file": "transitions/home-to-projects/23.png",
+          "progress": 0.92,
+          "worldX": 1761
+        },
+        {
+          "file": "transitions/home-to-projects/24.png",
+          "progress": 0.96,
+          "worldX": 1837
+        },
+        {
+          "file": "transitions/home-to-projects/25.png",
+          "progress": 1.0,
+          "worldX": 1914
+        }
+      ]
+    },
+    {
+      "name": "projects-to-experience",
+      "intermediateFrameCount": 24,
+      "frames": [
+        {
+          "file": "transitions/projects-to-experience/00.png",
+          "progress": 0.0,
+          "worldX": 1914
+        },
+        {
+          "file": "transitions/projects-to-experience/01.png",
+          "progress": 0.04,
+          "worldX": 1981
+        },
+        {
+          "file": "transitions/projects-to-experience/02.png",
+          "progress": 0.08,
+          "worldX": 2049
+        },
+        {
+          "file": "transitions/projects-to-experience/03.png",
+          "progress": 0.12,
+          "worldX": 2116
+        },
+        {
+          "file": "transitions/projects-to-experience/04.png",
+          "progress": 0.16,
+          "worldX": 2184
+        },
+        {
+          "file": "transitions/projects-to-experience/05.png",
+          "progress": 0.2,
+          "worldX": 2251
+        },
+        {
+          "file": "transitions/projects-to-experience/06.png",
+          "progress": 0.24,
+          "worldX": 2319
+        },
+        {
+          "file": "transitions/projects-to-experience/07.png",
+          "progress": 0.28,
+          "worldX": 2386
+        },
+        {
+          "file": "transitions/projects-to-experience/08.png",
+          "progress": 0.32,
+          "worldX": 2454
+        },
+        {
+          "file": "transitions/projects-to-experience/09.png",
+          "progress": 0.36,
+          "worldX": 2521
+        },
+        {
+          "file": "transitions/projects-to-experience/10.png",
+          "progress": 0.4,
+          "worldX": 2588
+        },
+        {
+          "file": "transitions/projects-to-experience/11.png",
+          "progress": 0.44,
+          "worldX": 2656
+        },
+        {
+          "file": "transitions/projects-to-experience/12.png",
+          "progress": 0.48,
+          "worldX": 2723
+        },
+        {
+          "file": "transitions/projects-to-experience/13.png",
+          "progress": 0.52,
+          "worldX": 2791
+        },
+        {
+          "file": "transitions/projects-to-experience/14.png",
+          "progress": 0.56,
+          "worldX": 2858
+        },
+        {
+          "file": "transitions/projects-to-experience/15.png",
+          "progress": 0.6,
+          "worldX": 2926
+        },
+        {
+          "file": "transitions/projects-to-experience/16.png",
+          "progress": 0.64,
+          "worldX": 2993
+        },
+        {
+          "file": "transitions/projects-to-experience/17.png",
+          "progress": 0.68,
+          "worldX": 3060
+        },
+        {
+          "file": "transitions/projects-to-experience/18.png",
+          "progress": 0.72,
+          "worldX": 3128
+        },
+        {
+          "file": "transitions/projects-to-experience/19.png",
+          "progress": 0.76,
+          "worldX": 3195
+        },
+        {
+          "file": "transitions/projects-to-experience/20.png",
+          "progress": 0.8,
+          "worldX": 3263
+        },
+        {
+          "file": "transitions/projects-to-experience/21.png",
+          "progress": 0.84,
+          "worldX": 3330
+        },
+        {
+          "file": "transitions/projects-to-experience/22.png",
+          "progress": 0.88,
+          "worldX": 3398
+        },
+        {
+          "file": "transitions/projects-to-experience/23.png",
+          "progress": 0.92,
+          "worldX": 3465
+        },
+        {
+          "file": "transitions/projects-to-experience/24.png",
+          "progress": 0.96,
+          "worldX": 3533
+        },
+        {
+          "file": "transitions/projects-to-experience/25.png",
+          "progress": 1.0,
+          "worldX": 3600
+        }
+      ]
+    }
+  ],
+  "homeExit": {
+    "frames": [
+      {
+        "file": "transitions/home-exit/00.png",
+        "progress": 0.0,
+        "worldX": 0,
+        "wholeObjectOpacity": 1.0
+      },
+      {
+        "file": "transitions/home-exit/01.png",
+        "progress": 0.08333333333333333,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.980324
+      },
+      {
+        "file": "transitions/home-exit/02.png",
+        "progress": 0.16666666666666666,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.925926
+      },
+      {
+        "file": "transitions/home-exit/03.png",
+        "progress": 0.25,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.84375
+      },
+      {
+        "file": "transitions/home-exit/04.png",
+        "progress": 0.3333333333333333,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.740741
+      },
+      {
+        "file": "transitions/home-exit/05.png",
+        "progress": 0.4166666666666667,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.623843
+      },
+      {
+        "file": "transitions/home-exit/06.png",
+        "progress": 0.5,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.5
+      },
+      {
+        "file": "transitions/home-exit/07.png",
+        "progress": 0.5833333333333334,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.376157
+      },
+      {
+        "file": "transitions/home-exit/08.png",
+        "progress": 0.6666666666666666,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.259259
+      },
+      {
+        "file": "transitions/home-exit/09.png",
+        "progress": 0.75,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.15625
+      },
+      {
+        "file": "transitions/home-exit/10.png",
+        "progress": 0.8333333333333334,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.074074
+      },
+      {
+        "file": "transitions/home-exit/11.png",
+        "progress": 0.9166666666666666,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.019676
+      },
+      {
+        "file": "transitions/home-exit/12.png",
+        "progress": 1.0,
+        "worldX": 0,
+        "wholeObjectOpacity": 0.0
+      }
+    ],
+    "instruction": "Fade complete Home foreground out at fixed worldX=0 before panning; reverse when returning."
+  },
+  "contentAreas": {
+    "projects": [
+      {
+        "id": "primary-copy",
+        "box": [
+          120,
+          65,
+          950,
+          330
+        ],
+        "text": [
+          23,
+          28,
+          38
+        ]
+      },
+      {
+        "id": "project-cards",
+        "box": [
+          120,
+          610,
+          1010,
+          900
+        ],
+        "text": [
+          23,
+          28,
+          38
+        ]
+      }
+    ],
+    "experience": [
+      {
+        "id": "primary-copy",
+        "box": [
+          150,
+          60,
+          1110,
+          330
+        ],
+        "text": [
+          255,
+          245,
+          232
+        ]
+      }
+    ]
+  }
+}

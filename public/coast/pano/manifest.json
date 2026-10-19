@@ -1,0 +1,38 @@
+{
+  "patch": {
+    "x": 1120,
+    "y": 580,
+    "width": 760,
+    "height": 412
+  },
+  "width": 5580,
+  "height": 992,
+  "horizon": 422,
+  "dataTop": 422,
+  "join": 1900,
+  "panoramaOffset": 236,
+  "designWindow": 1744,
+  "zones": {
+    "home": 0,
+    "projects": 2150,
+    "experience": 3836
+  },
+  "strips": {
+    "projects": {
+      "x": 2380,
+      "y": 250,
+      "width": 700,
+      "height": 500,
+      "edge": "#dddbdf"
+    },
+    "experience": {
+      "x": 4420,
+      "y": 200,
+      "width": 700,
+      "height": 440,
+      "edge": "#26436d"
+    }
+  },
+  "duskStart": 1600,
+  "duskEnd": 2900
+}

@@ -4,7 +4,7 @@ import {
   TextureLoader, Vector2, Vector3, Vector4, WebGLRenderer,
 } from "three";
 import { defaultState, referenceEnvironment, waves, type SceneState } from "./scene-config";
-import { scene, type SceneFrame } from "./scene-manifest";
+import { assetSets, scene, type AssetSetName, type SceneFrame } from "./scene-manifest";
 import { vertexShader, fragmentShader } from "./shaders";
 import { SceneClock } from "./clock";
 
@@ -15,7 +15,9 @@ export interface SceneController {
   set(patch: ScenePatch): void;
   /** Resizes the drawing buffer to the visible window of the scene. */
   setFrame(frame: SceneFrame): void;
-  get(): SceneState & { frames: number; averageFrameMs: number; running: boolean; reducedMotion: boolean };
+  /** Opacity of the Home objects (DOM sprites); the original art under them fades with it. */
+  setObjects(opacity: number): void;
+  get(): SceneState & { frames: number; averageFrameMs: number; running: boolean; reducedMotion: boolean; view: SceneFrame; assets: AssetSetName };
   reference(): void;
   dispose(): void;
 }
@@ -25,23 +27,32 @@ export async function createCoastRenderer(
   onUnavailable: () => void,
   initial: SceneFrame,
   onMotionChange?: (paused: boolean, reduced: boolean) => void,
+  assetName: AssetSetName = "home",
 ): Promise<SceneController> {
+  const set = assetSets[assetName];
   const renderer = new WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: "low-power" });
+  if (renderer.capabilities.maxTextureSize < set.width) {
+    renderer.dispose();
+    throw new Error(`This GPU cannot hold the ${set.width} px scene.`);
+  }
   renderer.setPixelRatio(1);
-  renderer.setSize(Math.round(initial.width), Math.round(initial.height), false);
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = NoToneMapping;
 
   const textures: Texture[] = [];
   const loader = new TextureLoader();
+  // The Home sky layers (atmosphere, sun) are shared; the rest come from the chosen set.
   const assets = [
-    ["uGround","ground.png",true], ["uWater","water.png",true],
-    ["uAtmosphere","atmosphere.png",true], ["uSun","sun.png",true],
-    ["uShore","shore-field.png",false], ["uFlow","flow-field.png",false],
-    ["uDetail","water-detail.png",false],
+    ["uGround",`${set.dir}ground.png`,true], ["uWater",`${set.dir}water.png`,true],
+    ["uAtmosphere","/coast/atmosphere.png",true], ["uSun","/coast/sun.png",true],
+    ["uShore",`${set.dir}shore-field.png`,false], ["uFlow",`${set.dir}flow-field.png`,false],
+    ["uDetail",`${set.dir}water-detail.png`,false],
+    // The Home set is the original art already, so it reuses its own layers as the patch.
+    ["uPatchGround",set.patch ? `${set.dir}home-patch-ground.png` : `${set.dir}ground.png`,true],
+    ["uPatchWater",set.patch ? `${set.dir}home-patch-water.png` : `${set.dir}water.png`,true],
   ] as const;
   const loaded = await Promise.allSettled(assets.map(async ([key,path,color]) => {
-    const texture = await loader.loadAsync(`/coast/${path}`);
+    const texture = await loader.loadAsync(path);
     textures.push(texture);
     texture.colorSpace = color ? SRGBColorSpace : NoColorSpace;
     texture.minFilter = NearestFilter;
@@ -57,10 +68,16 @@ export async function createCoastRenderer(
   const textureUniforms = Object.fromEntries(loaded.flatMap(r=>r.status==="fulfilled" ? [r.value] : []));
   const uniforms = {
     ...textureUniforms,
-    uSize: { value: new Vector2(scene.width,scene.height) },
-    uBuf: { value: new Vector2(Math.round(initial.width),Math.round(initial.height)) },
-    uView: { value: new Vector2(Math.round(initial.x),Math.round(initial.y)) },
+    uSize: { value: new Vector2(set.width,set.height) },
+    uBuf: { value: new Vector2(1,1) },
+    uView: { value: new Vector2() },
     uSunPos: { value: new Vector2(scene.sun.x,scene.sun.y) },
+    uDataTop: { value: set.dataTop },
+    uAtmoSize: { value: new Vector2(scene.width,scene.horizon) },
+    uJoin: { value: set.join },
+    uDusk: { value: new Vector2(set.dusk[0],set.dusk[1]) },
+    uPatch: { value: set.patch ? new Vector4(set.patch.x,set.patch.y,set.patch.x+set.patch.width,set.patch.y+set.patch.height) : new Vector4() },
+    uObjects: { value: 1 },
     uTime: { value: 0 }, uSeed: { value: defaultState.seed },
     uMotion: { value: defaultState.motion }, uRunup: { value: defaultState.maxRunup },
     uWaves: { value: waves.map(w=>new Vector4(...w)) },
@@ -152,14 +169,35 @@ export async function createCoastRenderer(
   });
   observer.observe(canvas);
 
-  const controller: SceneController = {
-    setFrame(next) {
-      const width = Math.round(next.width), height = Math.round(next.height);
-      if (!(width > 0 && height > 0)) return;
+  const view: SceneFrame = { x: 0, y: 0, width: 0, height: 0 };
+  // The buffer is one scene pixel wider than the window and only ever drawn at whole scene
+  // pixels; the fractional part of the camera is a CSS shift of the canvas, so the art
+  // pans smoothly without resampling or shimmering.
+  function place(next: SceneFrame) {
+    const width = Math.ceil(next.width-1e-6)+1, height = Math.round(next.height);
+    if (!(width > 1 && height > 0)) return false;
+    if (width !== uniforms.uBuf.value.x || height !== uniforms.uBuf.value.y) {
       renderer.setSize(width,height,false);
       uniforms.uBuf.value.set(width,height);
-      uniforms.uView.value.set(Math.round(next.x),Math.round(next.y));
-      if (!dead && !failed) render();
+    }
+    const whole = Math.floor(next.x+1e-6);
+    uniforms.uView.value.set(whole,Math.round(next.y));
+    canvas.style.width = `${width/next.width*100}%`;
+    canvas.style.transform = `translateX(${-(next.x-whole)/width*100}%)`;
+    Object.assign(view,next);
+    return true;
+  }
+  place(initial);
+
+  const controller: SceneController = {
+    setFrame(next) {
+      if (place(next) && !dead && !failed && !raf) render();
+    },
+    setObjects(opacity) {
+      const value = Math.min(1,Math.max(0,opacity));
+      if (value === uniforms.uObjects.value) return;
+      uniforms.uObjects.value = value;
+      if (!dead && !failed && !raf) render();
     },
     set(patch) {
       if (patch.time !== undefined && Number.isFinite(patch.time)) { state.time=Math.max(0,patch.time); clock.seek(state.time); }
@@ -173,7 +211,7 @@ export async function createCoastRenderer(
     get() {
       return { ...state, environment: structuredClone(state.environment), frames,
         averageFrameMs: timedFrames ? frameTotal/timedFrames : 0,
-        running: canAnimate(), reducedMotion: reduced };
+        running: canAnimate(), reducedMotion: reduced, view: { ...view }, assets: assetName };
     },
     reference() {
       state.environment={...referenceEnvironment};

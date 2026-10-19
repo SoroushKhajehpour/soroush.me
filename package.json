@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "playwright test",
     "test:visual": "node scripts/capture-coast.mjs && python3 scripts/compare-coast.py",
-    "assets:coast": "python3 scripts/extract-coast.py"
+    "assets:coast": "python3 scripts/extract-coast.py",
+    "assets:panorama": "python3 scripts/extract-panorama.py"
   },
   "dependencies": {
     "next": "16.4.0",

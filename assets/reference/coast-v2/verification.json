@@ -1,0 +1,75 @@
+{
+  "mainBackgroundCount": 2,
+  "mainDimensions": [
+    1744,
+    992
+  ],
+  "masterDimensions": [
+    5344,
+    992
+  ],
+  "homeSkyExact": true,
+  "panFramesVerified": 52,
+  "adjacentOverlapChecksPassed": 50,
+  "maxOverlapChannelDifference": 0,
+  "homeExitFrames": 13,
+  "contrastSamples": {
+    "projects": [
+      {
+        "id": "primary-copy",
+        "box": [
+          120,
+          65,
+          950,
+          330
+        ],
+        "text": [
+          23,
+          28,
+          38
+        ],
+        "medianContrast": 8.72,
+        "fifthPercentileContrast": 6.5,
+        "fractionPixelsAtLeast4_5": 0.99995
+      },
+      {
+        "id": "project-cards",
+        "box": [
+          120,
+          610,
+          1010,
+          900
+        ],
+        "text": [
+          23,
+          28,
+          38
+        ],
+        "medianContrast": 12.36,
+        "fifthPercentileContrast": 9.91,
+        "fractionPixelsAtLeast4_5": 0.996556
+      }
+    ],
+    "experience": [
+      {
+        "id": "primary-copy",
+        "box": [
+          150,
+          60,
+          1110,
+          330
+        ],
+        "text": [
+          255,
+          245,
+          232
+        ],
+        "medianContrast": 11.54,
+        "fifthPercentileContrast": 7.63,
+        "fractionPixelsAtLeast4_5": 0.999799
+      }
+    ]
+  },
+  "masterSha256": "24cad092378a73745e56f256d18c43e6a0f25519a3cc1424cf8e6b2dd04ccef7",
+  "finalHomeJoinUsesContinuousSourceMargin": true
+}

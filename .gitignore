@@ -46,3 +46,11 @@ next-env.d.ts
 /docs/verification/*.webm
 /docs/verification/phases/
 /docs/verification/raw-video/
+/docs/verification/panorama/
+# the artwork delivery archive (its contents are unpacked in assets/reference/coast-v2)
+/assets/reference/coast-v2-delivery.zip
+# artwork review frames and intermediates (kept locally; the site renders continuous-master.png)
+/assets/reference/coast-v2/transitions/
+/assets/reference/coast-v2/work/
+/assets/reference/coast-v2/transition-preview.webp
+/assets/reference/panorama-work/

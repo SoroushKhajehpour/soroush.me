@@ -1,6 +1,6 @@
 # Soroush's coast
 
-A Next.js homepage reconstructed from the approved 1585 × 992 illustration. The original artwork is decomposed into independent lossless layers, extended sideways so it fills any screen, with a Three.js shader animating the sea, the wash on the beach and a few ambient details (glitter, clouds, sun glow). The introduction is semantic HTML; the exact bitmap title and foreground objects retain their source pixels.
+A Next.js portfolio set in one continuous pixel-art beach. Home is the approved 1585 × 992 illustration, decomposed into lossless layers; scrolling pans the camera right along a 5580 px panorama (`assets/reference/coast-v2`) to a dusk stretch of beach for Projects and a night cove for Experience. One Three.js shader animates the sea, the wash and a few ambient details across the whole panorama. All text is semantic HTML; the bitmap title and foreground objects retain their source pixels. Phones get the Home scene with the zones stacked below it.
 
 ## Run
 
@@ -15,7 +15,9 @@ The preview prepared during implementation is http://localhost:3001, running fro
 
 ## Edit
 
-- Profile content, wave parameters, and environment presets: `lib/coast/scene-config.ts`.
+- Navigation, projects, experience, links and the resume path: `lib/content.ts` (`blurb` is the short text shown in the panorama). Project previews are 720 × 480 images in `public/projects/`; the resume is `public/resume.pdf`.
+- The scroll timeline (object fade, pans, resting points) and zone camera positions: `lib/coast/camera.ts`; the stage, scroll and keyboard handling: `components/home/Panorama.tsx`; zone layouts: `components/home/Projects.tsx`, `Experience.tsx` and `app/globals.css`.
+- Intro bullets, wave parameters, and environment presets: `lib/coast/scene-config.ts`.
 - Scene coordinates (in the 2335 px wide extended scene) and shared object anchors: `public/coast/manifest.json` and `lib/coast/scene-manifest.ts`.
 - Gallery/music callback contracts: `components/home/SceneObjects.tsx`. Supply real `open-life` and `open-music` callbacks when those features have content; the current objects are decorative.
 - Rendering and resource lifecycle: `lib/coast/renderer.ts`; wave/shoreline behavior: `lib/coast/shaders.ts`.
@@ -39,4 +41,4 @@ python3 -m pip install -r scripts/requirements.txt
 npm run test:visual
 ```
 
-`npm run assets:coast` regenerates all artwork layers and data masks from `assets/reference/homepage_design.png`. The script asserts an exact reconstruction before browser rendering. Ordinary development needs neither Python nor asset regeneration. Generated QA images and recordings are ignored by Git; the numerical verification reports are retained.
+`npm run assets:coast` regenerates the Home layers and data masks from `assets/reference/homepage_design.png`; `npm run assets:panorama` then derives the panorama layers (`public/coast/pano/`) from those and `assets/reference/coast-v2/continuous-master.png`, writing QA overlays to `docs/verification/panorama/`. Run them in that order. The script asserts an exact reconstruction before browser rendering. Ordinary development needs neither Python nor asset regeneration. Generated QA images and recordings are ignored by Git; the numerical verification reports are retained.

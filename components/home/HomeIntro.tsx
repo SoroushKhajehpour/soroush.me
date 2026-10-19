@@ -3,7 +3,7 @@ import { profile } from "@/lib/coast/scene-config";
 /* Exact extracted bitmap lettering; the editable h1 remains the accessible name. */
 export function HomeIntro() {
   return (
-    <header className="home-intro">
+    <header className="home-intro" id="home">
       <h1 className="name">
         <span className="sr-only">{profile.name}</span>
         {/* Native images preserve authored pixels; Next image resizing would resample them. */}

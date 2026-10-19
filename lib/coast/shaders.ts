@@ -16,10 +16,18 @@ uniform sampler2D uSun;
 uniform sampler2D uShore;
 uniform sampler2D uFlow;
 uniform sampler2D uDetail;
-uniform vec2 uSize;   // whole scene (scene px)
+uniform sampler2D uPatchGround; // original Home layers around the objects (see extract-panorama.py)
+uniform sampler2D uPatchWater;
+uniform vec4 uPatch;            // its world rectangle: x0, y0, x1, y1
+uniform float uObjects;         // opacity of the Home objects; the patch fades with them
+uniform vec2 uSize;   // whole world (scene px)
 uniform vec2 uBuf;    // drawing buffer = the visible window
-uniform vec2 uView;   // top-left of the visible window in the scene
+uniform vec2 uView;   // top-left of the visible window in the world
 uniform vec2 uSunPos;
+uniform float uDataTop;  // first world row covered by the water and data layers
+uniform vec2 uAtmoSize;  // the Home sky layer (atmosphere) covers x < uAtmoSize.x
+uniform float uJoin;     // Home sky layers apply left of this column only
+uniform vec2 uDusk;      // sunset-only effects fade out across this x range
 uniform float uTime;
 uniform float uSeed;
 uniform float uMotion;
@@ -34,7 +42,11 @@ uniform float uReflection;
 const float TAU = 6.28318530718;
 
 vec2 texUV(vec2 p) { return vec2(p.x/uSize.x, 1.0-p.y/uSize.y); }
-vec4 field(vec2 p) { return texture2D(uShore,texUV(p)); }
+// Water and data layers start at the horizon row.
+vec2 dataUV(vec2 p) { return vec2(p.x/uSize.x, 1.0-(p.y-uDataTop)/(uSize.y-uDataTop)); }
+vec4 field(vec2 p) { return texture2D(uShore,dataUV(p)); }
+float inPatch(vec2 p) { return step(uPatch.x,p.x)*step(p.x,uPatch.z-0.5)*step(uPatch.y,p.y)*step(p.y,uPatch.w-0.5); }
+vec2 patchUV(vec2 p) { return vec2((p.x-uPatch.x)/(uPatch.z-uPatch.x), 1.0-(p.y-uPatch.y)/(uPatch.w-uPatch.y)); }
 float distanceToShore(vec2 p) {
   vec4 f = field(p);
   return (floor(f.r*255.0+0.5)*256.0+floor(f.g*255.0+0.5))/16.0-1024.0;
@@ -75,18 +87,23 @@ void main() {
   float settle = smoothstep(0.0,1.5,uTime)*uMotion;
   vec4 ground = texture2D(uGround,texUV(p));
   vec3 color = ground.rgb;
+  float original = inPatch(p)*uObjects;
+  if (original > 0.0) color = mix(color,texture2D(uPatchGround,patchUV(p)).rgb,original);
   float shore = distanceToShore(p);
-  vec4 flow = texture2D(uFlow,texUV(p));
+  vec4 flow = texture2D(uFlow,dataUV(p));
+  // 0 where the sunset lights the scene, 1 where the panorama has turned to dusk and night.
+  float dusk = smoothstep(uDusk.x,uDusk.y,p.x);
   vec2 normal = normalize(flow.rg*2.0-1.0);
 
-  if (p.y < 422.0) {
+  if (p.y < 422.0 && p.x < uJoin) {
     vec2 hp = p-uSunOffset;
     // Streaks of cloud drift slowly, each row at its own pace.
     float cloud = (sin(uTime*0.13+hp.y*0.05)-sin(hp.y*0.05))*9.0*settle;
     cloud *= smoothstep(150.0,330.0,length(hp-uSunPos-vec2(64.0,63.0))); // keep the sun's own glow still
+    cloud *= 1.0-smoothstep(uJoin-320.0,uJoin-80.0,p.x);                  // and the clouds at the join
     hp.x += floor(cloud+0.5);
-    if (hp.x>=0.0 && hp.x<uSize.x && hp.y>=0.0 && hp.y<422.0) {
-      vec4 halo = texture2D(uAtmosphere,vec2(hp.x/uSize.x,1.0-hp.y/422.0));
+    if (hp.x>=0.0 && hp.x<uAtmoSize.x && hp.y>=0.0 && hp.y<422.0) {
+      vec4 halo = texture2D(uAtmosphere,vec2(hp.x/uAtmoSize.x,1.0-hp.y/422.0));
       float glow = 1.0+0.05*settle*sin(uTime*0.7);
       color = mix(color,halo.rgb,clamp(halo.a*uWarmth*glow,0.0,1.0));
     }
@@ -95,6 +112,8 @@ void main() {
       vec4 sun = texture2D(uSun,vec2(sp.x/129.0,1.0-sp.y/127.0));
       color = mix(color,sun.rgb,sun.a);
     }
+    color *= uSkyTint;
+  } else if (p.y < 422.0) {
     color *= uSkyTint;
   } else {
     color *= uSandTint;
@@ -107,7 +126,7 @@ void main() {
     float swash = ((wash(phase+uTime*TAU/8.8)-wash(phase))*0.7
                  + (wash(phase*1.7+1.3+uTime*TAU/13.3)-wash(phase*1.7+1.3))*0.3)*0.5*uRunup*uMotion;
     float boundary = 1.0-smoothstep(8.0,90.0,abs(shore));
-    float reflectionHere = texture2D(uDetail,texUV(p)).g;
+    float reflectionHere = texture2D(uDetail,dataUV(p)).g;
     vec2 drift = waveOffset(p,uTime)*uMotion*smoothstep(3.0,60.0,-shore);
     // The sun's glitter path wobbles row by row.
     vec2 shimmer = vec2(floor(sin(p.y*0.8+uTime*2.4)*2.0+sin(p.y*0.37-uTime*1.6)*1.5+0.5)*reflectionHere*settle,0.0);
@@ -116,10 +135,12 @@ void main() {
     displacement = floor(displacement+0.5);
     vec2 q = p + displacement;
     q.y = max(q.y,422.5);
-    vec4 water = texture2D(uWater,texUV(q));
+    vec4 water = texture2D(uWater,dataUV(q));
     if (water.a > 0.5) {
       vec3 waterColor = water.rgb;
-      vec4 detail = texture2D(uDetail,texUV(q));
+      float originalWater = inPatch(q)*uObjects;
+      if (originalWater > 0.0) waterColor = mix(waterColor,texture2D(uPatchWater,patchUV(q)).rgb,originalWater);
+      vec4 detail = texture2D(uDetail,dataUV(q));
       float depth = field(p).b;
       float travelling = sin(p.y*0.041-p.x*0.004-uTime*0.71)
                        - sin(p.y*0.041-p.x*0.004);
@@ -129,15 +150,17 @@ void main() {
       vec2 cell = floor(q/vec2(9.0,3.0));
       float tick = floor(uTime*2.4+hash21(cell)*8.0);
       float blink = hash21(cell+tick*1.7);
-      waterColor = mix(waterColor,vec3(0.6,0.63,0.67),step(0.8,blink)*detail.r*0.7*settle);
+      // Under the sunset a dash dims to the Home grey; at dusk and night it dims toward its own sea.
+      vec3 dimmed = mix(vec3(0.6,0.63,0.67),waterColor*0.72,dusk);
+      waterColor = mix(waterColor,dimmed,step(0.8,blink)*detail.r*0.7*settle);
       float spark = step(0.93,hash21(floor(q/2.0)+floor(uTime*3.0)*3.1));
       waterColor = mix(waterColor,vec3(1.0,0.9,0.72),spark*detail.g*0.55*settle);
       if (abs(uSunOffset.x)>0.01 || abs(uReflection-1.0)>0.001) {
         float r = detail.g;
         waterColor = mix(waterColor,vec3(coastLuminance(waterColor)),r);
         vec2 rp = q-vec2(uSunOffset.x,0.0);
-        float shiftedR = texture2D(uDetail,texUV(rp)).g;
-        vec3 shifted = texture2D(uWater,texUV(rp)).rgb;
+        float shiftedR = texture2D(uDetail,dataUV(rp)).g;
+        vec3 shifted = texture2D(uWater,dataUV(rp)).rgb;
         waterColor = mix(waterColor,shifted,shiftedR*uReflection);
       }
       color = waterColor*uWaterTint;

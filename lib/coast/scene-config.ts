@@ -2,8 +2,6 @@ export const profile = {
   name: "SOROUSH KHAJEHPOUR",
   details: [
     "computer engineering @ uwaterloo",
-    "software developer intern @ KA Imaging",
-    "prev software intern @ roam",
     "seeking summer 2027 internships",
   ],
 };
