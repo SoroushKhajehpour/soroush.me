@@ -1,0 +1,44 @@
+{
+  "status": "passed",
+  "sequences": {
+    "flight": {
+      "frames": 3,
+      "size": [
+        192,
+        128
+      ],
+      "minimumTransparentMarginPx": 12
+    },
+    "impact": {
+      "frames": 6,
+      "size": [
+        224,
+        160
+      ],
+      "minimumTransparentMarginPx": 8
+    },
+    "idle": {
+      "frames": 2,
+      "size": [
+        128,
+        96
+      ],
+      "minimumTransparentMarginPx": 11
+    },
+    "activation": {
+      "frames": 5,
+      "size": [
+        128,
+        96
+      ],
+      "minimumTransparentMarginPx": 10
+    }
+  },
+  "notes": [
+    "Every production frame has hard alpha and at least three transparent pixels on every edge.",
+    "Sheets match the individual frames byte for byte.",
+    "Activation begins and ends on the exact resting image.",
+    "Original poses were generated individually; the style-reference screenshot was not sliced.",
+    "Visual alignment and palette were also inspected in the contact sheets."
+  ]
+}

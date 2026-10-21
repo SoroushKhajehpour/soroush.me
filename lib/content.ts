@@ -4,6 +4,7 @@
 export const resumeHref = "/resume.pdf";
 
 export const nav = [
+  { label: "HOME", href: "#home" },
   { label: "PROJECTS", href: "#projects" },
   { label: "EXPERIENCE", href: "#experience" },
   { label: "RESUME ↗", href: resumeHref, external: true },
@@ -58,25 +59,31 @@ export interface Experience {
   summary?: string;
   /** What the panorama shows: the opening of the summary. */
   blurb?: string;
+  /** How the company name breaks onto lines in the timeline (optional). */
+  companyLines?: readonly string[];
+  /** Company logo in public/logos (any aspect ratio; shown about 30 px tall). */
+  logo?: string;
 }
 
 export const experience: readonly Experience[] = [
   {
     company: "KA Imaging",
+    logo: "/logos/ka-imaging.png",
     role: "Software Developer Intern",
     dates: "Present",
   },
   {
     company: "Roam",
+    logo: "/logos/roam.png",
     role: "Software Engineering Intern",
     dates: "Jan – Apr 2026",
-    href: "https://www.roam.auto/",
     summary:
       "Built and shipped a fleet-maintenance platform serving 1,000+ vehicles in Rails, React and PostgreSQL. Integrated Geotab and Samsara telematics for live odometer and vehicle data, and engineered the Sidekiq, Redis and S3 background jobs that process 10,000+ telemetry events a day.",
     blurb: "Built and shipped a fleet-maintenance platform serving 1,000+ vehicles in Rails, React and PostgreSQL, with live Geotab and Samsara telematics.",
   },
   {
     company: "UW Reality Labs",
+    logo: "/logos/uw-reality-labs.png",
     role: "Software Developer",
     dates: "Sep – Dec 2025",
     summary:
@@ -85,6 +92,8 @@ export const experience: readonly Experience[] = [
   },
   {
     company: "Turner Fenton Rocketry Association",
+    companyLines: ["Turner Fenton", "Rocketry Association"],
+    logo: "/logos/turner-fenton-rocketry.png",
     role: "Vice President of Software",
     dates: "Mar 2024 – Jun 2025",
     summary:

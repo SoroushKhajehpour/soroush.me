@@ -197,10 +197,20 @@ patch_ground[sprites_px] = base[:, :2335][sprites_px]
 save("home-patch-ground.png", patch_ground[py0:py1, px0:px1])
 save("home-patch-water.png", patch_water[py0:py1, px0:px1])
 
+# The sand the beach camera lies on, clean, for when it has been picked up (both the Home
+# and the panorama renderer draw it there; the old Home plate keeps traces at its edges).
+cam_o = home_manifest_objects()["camera"]
+CLEAN_PAD = 8
+cx0, cy0 = cam_o["x"] - CLEAN_PAD, cam_o["y"] - CLEAN_PAD
+cx1, cy1 = cam_o["x"] + cam_o["width"] + CLEAN_PAD, min(H, cam_o["y"] + cam_o["height"] + CLEAN_PAD)
+save("camera-sand.png", base[cy0:cy1, cx0:cx1])
+
 # Static images: the no-WebGL fallback (clean, the DOM sprites sit on it) and the phone strips.
 Image.fromarray(world).save(OUT / "still.webp", lossless=True, method=6)
 # Each strip ends on the colour its stacked section continues in: dusk sand, night sea.
-STRIPS = {"projects": (2380, 250, 3080, 750), "experience": (4420, 200, 5120, 640)}
+STRIPS = {"projects": (2380, 250, 3080, 750), "experience": (4420, 200, 5120, 640),
+          # Phones: the cove's sea and dry sand, where the meteor lands (lib/coast/meteor.ts).
+          "experience-beach": (4420, 640, 5120, 992)}
 for name, box in STRIPS.items():
     Image.fromarray(world).crop(box).save(OUT / f"{name}-strip.webp", lossless=True, method=6)
 
@@ -210,6 +220,7 @@ def edge_colour(box):
 
 manifest = {
     "patch": {"x": px0, "y": py0, "width": px1 - px0, "height": py1 - py0},
+    "cameraSand": {"x": cx0, "y": cy0, "width": cx1 - cx0, "height": cy1 - cy0},
     "width": W, "height": H, "horizon": HORIZON, "dataTop": HORIZON, "join": JOIN,
     "panoramaOffset": OFFSET, "designWindow": DESIGN_WINDOW, "zones": ZONES,
     "strips": {k: {"x": v[0], "y": v[1], "width": v[2] - v[0], "height": v[3] - v[1], "edge": edge_colour(v)} for k, v in STRIPS.items()},

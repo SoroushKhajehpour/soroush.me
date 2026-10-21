@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "sequences": {
+    "flight": {
+      "sheet": "sheets/meteor-flight.png",
+      "individualFrames": [
+        "sprites/flight/01.png",
+        "sprites/flight/02.png",
+        "sprites/flight/03.png"
+      ],
+      "frameWidth": 192,
+      "frameHeight": 128,
+      "frameCount": 3,
+      "frameOrder": [
+        0,
+        1,
+        2
+      ],
+      "frameDurationMs": [
+        85,
+        85,
+        85
+      ],
+      "loop": true,
+      "anchor": {
+        "x": 44,
+        "y": 103
+      },
+      "contactPoint": null,
+      "recommendedScale": 2,
+      "imageRendering": "pixelated",
+      "sourceImages": [
+        "source/generated/flight-01.png",
+        "source/generated/flight-02.png",
+        "source/generated/flight-03.png"
+      ]
+    },
+    "impact": {
+      "sheet": "sheets/meteor-impact.png",
+      "individualFrames": [
+        "sprites/impact/01.png",
+        "sprites/impact/02.png",
+        "sprites/impact/03.png",
+        "sprites/impact/04.png",
+        "sprites/impact/05.png",
+        "sprites/impact/06.png"
+      ],
+      "frameWidth": 224,
+      "frameHeight": 160,
+      "frameCount": 6,
+      "frameOrder": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "frameDurationMs": [
+        75,
+        65,
+        90,
+        100,
+        110,
+        130
+      ],
+      "loop": false,
+      "anchor": {
+        "x": 112,
+        "y": 140
+      },
+      "contactPoint": {
+        "x": 112,
+        "y": 140
+      },
+      "recommendedScale": 2,
+      "imageRendering": "pixelated",
+      "sourceImages": [
+        "source/generated/impact-01.png",
+        "source/generated/impact-02.png",
+        "source/generated/impact-03.png",
+        "source/generated/impact-04.png",
+        "source/generated/impact-05.png",
+        "source/generated/impact-06.png"
+      ]
+    },
+    "idle": {
+      "sheet": "sheets/meteor-idle.png",
+      "individualFrames": [
+        "sprites/idle/01.png",
+        "sprites/idle/02.png"
+      ],
+      "frameWidth": 128,
+      "frameHeight": 96,
+      "frameCount": 2,
+      "frameOrder": [
+        0,
+        1
+      ],
+      "frameDurationMs": [
+        850,
+        850
+      ],
+      "loop": true,
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "contactPoint": {
+        "x": 64,
+        "y": 64
+      },
+      "recommendedScale": 2,
+      "imageRendering": "pixelated",
+      "sourceImages": [
+        "source/generated/idle-01.png",
+        "source/generated/idle-02.png"
+      ]
+    },
+    "activation": {
+      "sheet": "sheets/meteor-activation.png",
+      "individualFrames": [
+        "sprites/activation/01.png",
+        "sprites/activation/02.png",
+        "sprites/activation/03.png",
+        "sprites/activation/04.png",
+        "sprites/activation/05.png"
+      ],
+      "frameWidth": 128,
+      "frameHeight": 96,
+      "frameCount": 5,
+      "frameOrder": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "frameDurationMs": [
+        90,
+        100,
+        120,
+        100,
+        90
+      ],
+      "loop": false,
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "contactPoint": {
+        "x": 64,
+        "y": 64
+      },
+      "recommendedScale": 2,
+      "imageRendering": "pixelated",
+      "sourceImages": [
+        "source/generated/idle-01.png",
+        "source/generated/activation-01.png",
+        "source/generated/activation-02.png",
+        "source/generated/activation-03.png",
+        "source/generated/idle-01.png"
+      ]
+    }
+  }
+}

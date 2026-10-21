@@ -54,3 +54,6 @@ next-env.d.ts
 /assets/reference/coast-v2/work/
 /assets/reference/coast-v2/transition-preview.webp
 /assets/reference/panorama-work/
+# downloaded archives and Finder duplicates of the meteor pack
+/pixel-meteor-animation-pack.zip
+/pixel-meteor-animation-pack 2/

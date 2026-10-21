@@ -1,11 +1,11 @@
 import {
-  Mesh, NearestFilter, NoColorSpace, NoToneMapping, OrthographicCamera,
-  PlaneGeometry, Scene, ShaderMaterial, SRGBColorSpace, Texture,
-  TextureLoader, Vector2, Vector3, Vector4, WebGLRenderer,
+  ImageBitmapLoader, LinearFilter, Mesh, NearestFilter, NoColorSpace, NoToneMapping,
+  OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, SRGBColorSpace, Texture,
+  Vector2, Vector3, Vector4, WebGLRenderer, WebGLRenderTarget,
 } from "three";
 import { defaultState, referenceEnvironment, waves, type SceneState } from "./scene-config";
-import { assetSets, scene, type AssetSetName, type SceneFrame } from "./scene-manifest";
-import { vertexShader, fragmentShader } from "./shaders";
+import { assetSets, pano, scene, speaker, type AssetSetName, type SceneFrame } from "./scene-manifest";
+import { vertexShader, fragmentShader, presentFragmentShader } from "./shaders";
 import { SceneClock } from "./clock";
 
 export type ScenePatch = Partial<Omit<SceneState, "environment">> & {
@@ -13,10 +13,10 @@ export type ScenePatch = Partial<Omit<SceneState, "environment">> & {
 };
 export interface SceneController {
   set(patch: ScenePatch): void;
-  /** Resizes the drawing buffer to the visible window of the scene. */
+  /** Moves the camera (any fractional position) and fits the visible window of the scene. */
   setFrame(frame: SceneFrame): void;
-  /** Opacity of the Home objects (DOM sprites); the original art under them fades with it. */
-  setObjects(opacity: number): void;
+  /** Hides the beach camera while its held copy is on screen. */
+  setCameraVisible(visible: boolean): void;
   get(): SceneState & { frames: number; averageFrameMs: number; running: boolean; reducedMotion: boolean; view: SceneFrame; assets: AssetSetName };
   reference(): void;
   dispose(): void;
@@ -40,7 +40,11 @@ export async function createCoastRenderer(
   renderer.toneMapping = NoToneMapping;
 
   const textures: Texture[] = [];
-  const loader = new TextureLoader();
+  // Images are decoded off the main thread, exactly as stored (no colour management, no
+  // premultiplication: several are data, not pictures).
+  const loader = new ImageBitmapLoader();
+  loader.setOptions({ imageOrientation: "flipY", premultiplyAlpha: "none", colorSpaceConversion: "none" });
+  const objects = scene.objects;
   // The Home sky layers (atmosphere, sun) are shared; the rest come from the chosen set.
   const assets = [
     ["uGround",`${set.dir}ground.png`,true], ["uWater",`${set.dir}water.png`,true],
@@ -50,9 +54,13 @@ export async function createCoastRenderer(
     // The Home set is the original art already, so it reuses its own layers as the patch.
     ["uPatchGround",set.patch ? `${set.dir}home-patch-ground.png` : `${set.dir}ground.png`,true],
     ["uPatchWater",set.patch ? `${set.dir}home-patch-water.png` : `${set.dir}water.png`,true],
+    ["uCameraSand","/coast/pano/camera-sand.png",true],
+    ["uCamera",objects.camera.src,true], ["uSpeakerSand",speaker.sand.src,true], ["uLife",objects.life.src,true],
   ] as const;
   const loaded = await Promise.allSettled(assets.map(async ([key,path,color]) => {
-    const texture = await loader.loadAsync(path);
+    const texture = new Texture(await loader.loadAsync(path));
+    texture.flipY = false;
+    texture.needsUpdate = true;
     textures.push(texture);
     texture.colorSpace = color ? SRGBColorSpace : NoColorSpace;
     texture.minFilter = NearestFilter;
@@ -78,6 +86,11 @@ export async function createCoastRenderer(
     uDusk: { value: new Vector2(set.dusk[0],set.dusk[1]) },
     uPatch: { value: set.patch ? new Vector4(set.patch.x,set.patch.y,set.patch.x+set.patch.width,set.patch.y+set.patch.height) : new Vector4() },
     uObjects: { value: 1 },
+    uCameraVisible: { value: 1 },
+    uCameraSandRect: { value: new Vector4(pano.cameraSand.x,pano.cameraSand.y,pano.cameraSand.width,pano.cameraSand.height) },
+    uCameraRect: { value: new Vector4(objects.camera.x,objects.camera.y,objects.camera.width,objects.camera.height) },
+    uSpeakerSandRect: { value: new Vector4(speaker.sand.x,speaker.sand.y,speaker.sand.width,speaker.sand.height) },
+    uLifeRect: { value: new Vector4(objects.life.x,objects.life.y,objects.life.width,objects.life.height) },
     uTime: { value: 0 }, uSeed: { value: defaultState.seed },
     uMotion: { value: defaultState.motion }, uRunup: { value: defaultState.maxRunup },
     uWaves: { value: waves.map(w=>new Vector4(...w)) },
@@ -92,6 +105,16 @@ export async function createCoastRenderer(
   const world = new Scene();
   world.add(new Mesh(geometry,material));
   const camera = new OrthographicCamera(-1,1,1,-1,0,1);
+  // Pass 1 draws the window in scene pixels into this buffer (sRGB storage, so nothing is
+  // lost); pass 2 enlarges it to the canvas's device pixels with sharp bilinear filtering.
+  const target = new WebGLRenderTarget(1,1,{ colorSpace: SRGBColorSpace, minFilter: LinearFilter, magFilter: LinearFilter, generateMipmaps: false, depthBuffer: false });
+  const present = {
+    uImage: { value: target.texture }, uImageSize: { value: new Vector2(1,1) },
+    uScale: { value: new Vector2(1,1) }, uOffset: { value: new Vector2() }, uCanvas: { value: new Vector2(1,1) },
+  };
+  const presentMaterial = new ShaderMaterial({ uniforms: present, vertexShader, fragmentShader: presentFragmentShader, depthTest:false, depthWrite:false });
+  const screen = new Scene();
+  screen.add(new Mesh(geometry,presentMaterial));
   const clock = new SceneClock();
   const state: SceneState = { ...defaultState, environment: { ...referenceEnvironment } };
   const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -118,7 +141,10 @@ export async function createCoastRenderer(
     uniforms.uSandTint.value.set(...env.sand);
     uniforms.uWarmth.value = env.warmth;
     uniforms.uReflection.value = env.reflection;
+    renderer.setRenderTarget(target);
     renderer.render(world,camera);
+    renderer.setRenderTarget(null);
+    renderer.render(screen,camera);
     frames++;
   }
   function canAnimate() { return !dead && !failed && !state.paused && !reduced && inView && !document.hidden; }
@@ -170,34 +196,39 @@ export async function createCoastRenderer(
   observer.observe(canvas);
 
   const view: SceneFrame = { x: 0, y: 0, width: 0, height: 0 };
-  // The buffer is one scene pixel wider than the window and only ever drawn at whole scene
-  // pixels; the fractional part of the camera is a CSS shift of the canvas, so the art
-  // pans smoothly without resampling or shimmering.
+  // The scene buffer covers whole scene pixels from floor(camera); the camera's fraction is
+  // an offset in the enlarging pass, so the art pans smoothly at any position.
   function place(next: SceneFrame) {
-    const width = Math.ceil(next.width-1e-6)+1, height = Math.round(next.height);
-    if (!(width > 1 && height > 0)) return false;
+    if (!(next.width > 0 && next.height > 0)) return false;
+    const x0 = Math.floor(next.x+1e-6), y0 = Math.floor(next.y+1e-6);
+    const width = Math.ceil(next.x-x0+next.width)+1, height = Math.ceil(next.y-y0+next.height)+1;
     if (width !== uniforms.uBuf.value.x || height !== uniforms.uBuf.value.y) {
-      renderer.setSize(width,height,false);
+      target.setSize(width,height);
       uniforms.uBuf.value.set(width,height);
+      present.uImageSize.value.set(width,height);
     }
-    const whole = Math.floor(next.x+1e-6);
-    uniforms.uView.value.set(whole,Math.round(next.y));
-    canvas.style.width = `${width/next.width*100}%`;
-    canvas.style.transform = `translateX(${-(next.x-whole)/width*100}%)`;
+    uniforms.uView.value.set(x0,y0);
+    // Device pixels, capped at 2x: beyond that the extra pixels are invisible but costly.
+    const ratio = Math.min(2,window.devicePixelRatio || 1);
+    const cw = Math.max(1,Math.round((canvas.clientWidth || window.innerWidth)*ratio));
+    const ch = Math.max(1,Math.round((canvas.clientHeight || window.innerHeight)*ratio));
+    if (cw !== canvas.width || ch !== canvas.height) renderer.setSize(cw,ch,false);
+    present.uCanvas.value.set(cw,ch);
+    present.uScale.value.set(cw/next.width,ch/next.height);
+    present.uOffset.value.set(next.x-x0,next.y-y0);
     Object.assign(view,next);
     return true;
   }
   place(initial);
 
   const controller: SceneController = {
+    setCameraVisible(visible) {
+      if (uniforms.uCameraVisible.value === (visible ? 1 : 0)) return;
+      uniforms.uCameraVisible.value = visible ? 1 : 0;
+      if (!dead && !failed && !raf) render();
+    },
     setFrame(next) {
       if (place(next) && !dead && !failed && !raf) render();
-    },
-    setObjects(opacity) {
-      const value = Math.min(1,Math.max(0,opacity));
-      if (value === uniforms.uObjects.value) return;
-      uniforms.uObjects.value = value;
-      if (!dead && !failed && !raf) render();
     },
     set(patch) {
       if (patch.time !== undefined && Number.isFinite(patch.time)) { state.time=Math.max(0,patch.time); clock.seek(state.time); }
@@ -224,9 +255,11 @@ export async function createCoastRenderer(
       media.removeEventListener("change",preference);
       document.removeEventListener("visibilitychange",reconcile);
       canvas.removeEventListener("webglcontextlost",contextLost);
-      textures.forEach(t=>t.dispose());
+      textures.forEach(t=>{ t.dispose(); (t.image as ImageBitmap | undefined)?.close?.(); });
       geometry.dispose();
       material.dispose();
+      presentMaterial.dispose();
+      target.dispose();
       renderer.dispose();
     },
   };

@@ -30,6 +30,17 @@ The desktop site is one world, 5580 × 992 scene px, in Home's own coordinates (
 
 **Fallbacks.** Without WebGL (or below an 5580 px texture limit) Home shows the Home still; once the camera leaves Home the clean panorama still (`pano/still.webp`, fetched only then) replaces it and pans, with the DOM objects fading over it as usual. Phones and portrait tablets (and windows under 620 px tall) never load the panorama: they render the Home scene as before, then stack Projects and Experience, each opening with its own strip of the panorama.
 
+## Picking up the camera
+
+Clicking the camera on the Home beach (`components/home/CameraGallery.tsx`) plays one shot, a pure function of a timeline value t ∈ [0, 1] (`lib/coast/pickup.ts`); closing runs it backwards, and it can reverse from any point.
+
+- **Lean in (0 – 0.62).** The renderer's window narrows on a curved path (down toward the sand, then across) to about 2.6× around the camera. It is the same `setFrame` the panorama uses, so the art stays crisp and the waves keep moving; on phones the scene box also grows to fill the screen.
+- **Handover (0.55).** The shader stops drawing the camera (`uCameraVisible`) and samples clean sand under it (`pano/camera-sand.png`); an identical DOM sprite takes its place at the same pixels. It is everything the Home art shows of the camera (`camera-front.png`, `scripts/extract-camera-front.py`): the extracted sprite alone lacks the top edge of the body, which the extraction left in the ground plate.
+- **Pick up (0.56 – 1).** The camera rises on a small arc, grows, rolls slightly and turns over (CSS 3D, perspective) to `camera-rear.png`, while the view zooms partly back out so the sea and sun are behind it. A faint vignette, at most about 30 %, settles behind it.
+- **LCD (0.93 – 1).** HTML inside the measured screen of the sprite (`lib/photography/camera-rear.ts`, fractions of the PNG): a playback index of `lib/photography/photos.ts` (empty: `NO IMAGES`), single-photo view, and invisible hitboxes over the playback button, the d-pad and the lower button. Arrows, Enter and Escape are captured while it is open; Escape and the lower button step back, then put the camera down. The browser's back button also puts it down.
+
+The page's scroll, wheel, swipe and arrow handling pause while the camera is held (`data-camera` on the stage), and everything is restored exactly afterwards, including the view, the scroll position and focus. With reduced motion it is a 180 ms fade without zoom. Without WebGL the same shot runs over the clean panorama still with the DOM objects.
+
 ## Rendering and motion
 
 One orthographic Three.js draw composites the visible part of the scene. Color textures are sRGB, masks are linear data, sampling is nearest, and tone mapping and antialiasing are off. The drawing buffer is the visible window in scene pixels (for example 1831 × 992 on a 1440 × 780 browser window) and the browser scales it to the window. Downscaled art is smoothed; art scaled up 1.75× or more is pixelated. HTML stays at browser resolution. All foreground positions and future hit targets use the same scene-coordinate manifest.

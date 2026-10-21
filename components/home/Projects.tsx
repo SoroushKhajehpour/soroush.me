@@ -1,10 +1,14 @@
-import { links, projects } from "@/lib/content";
+import { projects } from "@/lib/content";
 import { pano } from "@/lib/coast/scene-manifest";
-import { PixelArrow } from "./PixelArrow";
+import { ProjectCard } from "./ProjectCard";
+import { Reveal } from "./Reveal";
 
-const github = links.find(link=>link.label === "GitHub");
-
-/* The dusk stretch of beach: heading in the sky, the projects laid out on the sand. */
+/*
+  The dusk stretch of beach: the projects as frosted-glass panels, three to a row. On
+  desktop the panel area scrolls on its own over the panorama when there are more rows
+  than fit; a scroll gesture that begins with room to scroll stays in the panel, and only
+  a fresh one at its end moves the camera on (components/home/Panorama.tsx).
+*/
 export function Projects() {
   const strip = pano.strips.projects;
   return (
@@ -12,31 +16,14 @@ export function Projects() {
       {/* Phones show this stretch of the panorama above the content. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="zone-strip" src="/coast/pano/projects-strip.webp" width={strip.width} height={strip.height} alt="" loading="lazy" decoding="async" />
-      <div className="zone-content">
-        <header className="zone-head">
-          <h2 className="zone-title" id="projects-title" tabIndex={-1}><span className="zone-index">01 /</span> PROJECTS</h2>
-          {github && <p className="zone-note">{projects.length} projects · <a href={github.href} target="_blank" rel="noopener noreferrer">more on GitHub<PixelArrow /></a></p>}
-        </header>
-        <ol className="project-list">
-          {projects.map(project=>(
-            <li className="project" key={project.title}>
-              {project.image && (
-                // Plain img, like the rest of the page: fixed 720 × 480 previews.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img className="project-media" src={project.image.src} alt={project.image.alt} width="720" height="480" loading="lazy" decoding="async" />
-              )}
-              <h3 className="project-title">
-                {project.href
-                  ? <a href={project.href} target="_blank" rel="noopener noreferrer">{project.title}<PixelArrow /></a>
-                  : project.title}
-              </h3>
-              <p className="project-text">{project.blurb}</p>
-              <ul className="project-tech" aria-label="Built with">
-                {project.tech.map(item=><li key={item}>{item}</li>)}
-              </ul>
-            </li>
-          ))}
-        </ol>
+      <div className="zone-content project-scroll">
+        {/* Named for screen readers and as the nav's focus target; the beach is the visual heading. */}
+        <h2 className="sr-only" id="projects-title" tabIndex={-1}>Projects</h2>
+        {/* Keeps the panels where they sat when the page had a heading. */}
+        <div className="pgrid-spacer" aria-hidden="true" />
+        <Reveal as="ol" className="pcard-grid">
+          {projects.map((project, i) => <ProjectCard key={project.title} project={project} index={i} />)}
+        </Reveal>
       </div>
     </section>
   );

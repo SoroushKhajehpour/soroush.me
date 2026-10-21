@@ -1,8 +1,7 @@
 import { boundsStyle, scene, sceneObjects, type SceneAction } from "@/lib/coast/scene-manifest";
 
 export interface SceneObjectsProps {
-  /** Supply real gallery/music handlers here when those features have content. */
-  onAction?: Partial<Record<SceneAction, () => void>>;
+  onAction?: Partial<Record<SceneAction, (button: HTMLButtonElement) => void>>;
 }
 
 export function SceneObjects({ onAction }: SceneObjectsProps) {
@@ -14,7 +13,7 @@ export function SceneObjects({ onAction }: SceneObjectsProps) {
           <div className="scene-object" data-object={object.id} key={object.id} style={boundsStyle(object)}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={object.src} width={object.width} height={object.height} alt="" draggable="false" />
-            {action && <button className="object-action" onClick={action} aria-label={object.label} />}
+            {action && <button className="object-action" onClick={event=>action(event.currentTarget)} aria-label={object.label} />}
           </div>
         );
       })}

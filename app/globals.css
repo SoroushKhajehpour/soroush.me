@@ -1,8 +1,9 @@
 :root { color-scheme: light; background: #fff; color: #080909; }
 * { box-sizing: border-box; }
 html,body { margin: 0; min-height: 100%; }
-html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
-body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
+html { scroll-behavior: smooth; overscroll-behavior-x: none; }
+/* Sideways swipes pan the beach (Panorama.tsx), so they must never navigate back or forward. */
+body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; overscroll-behavior-x: none; }
 
 /*
   The world is one panorama, 5580 scene px wide (Home is its left end). These numbers
@@ -25,17 +26,17 @@ body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
   --wh: min(992, calc(2335 / tan(atan2(100vw, 100svh))));
   --x0: calc(300 + max(0, 1585 - var(--ww)) * 0.9 - max(0, var(--ww) - 1585) * 0.4);
   --y0: calc(992 - var(--wh));
-  /* The scroll track: one screen of stage plus the camera timeline (lib/coast/camera.ts). */
-  position: relative; height: calc(100svh * 4.6);
+  /* One screen: the page does not scroll; components/home/Panorama.tsx moves the camera. */
+  position: relative; height: 100svh;
 }
-.track-stops span { position: absolute; left: 0; width: 1px; height: 1px; scroll-snap-align: start; }
-/* `clip`, not `hidden`: focusing an off-screen zone must never scroll the stage sideways. */
-.stage { position: sticky; top: 0; height: 100svh; overflow: clip; background: #fff; }
+/* `clip`, not `hidden`: focusing an off-screen zone must never scroll the stage sideways.
+   Touch drags are the camera's (Panorama.tsx); the projects' panel keeps its own panning. */
+.stage { position: sticky; top: 0; height: 100svh; overflow: clip; background: #fff; touch-action: pinch-zoom; }
 .homepage { position: absolute; inset: 0; }
 .scene-window { position: absolute; inset: 0; overflow: clip; }
 .scene-canvas,.scene-objects { position: absolute; inset: 0; width: 100%; height: 100%; }
 .scene-canvas { display: block; opacity: 0; transition: opacity 500ms ease; }
-.scene-window[data-sharp="true"] :is(.scene-canvas,.scene-object img) { image-rendering: pixelated; }
+.scene-window[data-sharp="true"] .scene-object img { image-rendering: pixelated; }
 .scene-fallback {
   position: absolute; display: block; max-width: none; image-rendering: auto;
   width: calc(2335 / var(--ww) * 100%); height: calc(992 / var(--wh) * 100%);
@@ -45,9 +46,10 @@ body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
 /* The Home still has the objects painted in, so it never pans: away from Home the clean
    panorama still replaces it (blank until loaded rather than a moving ghost). */
 [data-fallback="panorama"] .scene-fallback:not(.scene-fallback-panorama) { visibility: hidden; }
-/* The objects fade out as whole sprites before the camera moves (--objects, 1 → 0). */
+/* The renderer draws the objects into the scene; these DOM copies only serve the panorama
+   still when WebGL is unavailable (the Home still has them painted in). */
 .scene-objects { opacity: 0; pointer-events: none; }
-:is([data-ready="true"],[data-fallback="panorama"]) .scene-objects { opacity: var(--objects, 1); }
+[data-fallback="panorama"] .scene-objects { opacity: 1; }
 [data-ready="true"] .scene-canvas { opacity: 1; }
 [data-ready="true"] .scene-fallback { visibility: hidden; transition: visibility 0s 500ms; }
 .scene-object { position: absolute; }
@@ -60,7 +62,16 @@ body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
   position: absolute; left: max(20px, calc(74 * var(--u))); top: max(22px, calc(66 * var(--u)));
   margin: 0; display: flex; align-items: start; gap: calc(39 * var(--u));
 }
+.name-words { display: contents; }
+.name-word { position: relative; display: block; flex: none; }
 .name img { display: block; height: calc(65 * var(--u)); width: auto; image-rendering: auto; }
+/* Interactive letters (components/home/NameLetters.tsx): windows onto the same image. */
+.name-word .name-letter { position: absolute; top: 0; bottom: 0; overflow: hidden; pointer-events: none; }
+.name-word .name-letter img { position: absolute; top: 0; height: 100%; max-width: none; }
+.name-words[data-live] .name-base { visibility: hidden; }
+.name-slip { visibility: hidden; }
+.name-letter[data-glitch] .name-slip { visibility: visible; translate: var(--g-dx) 0; clip-path: inset(var(--g-top) 0 calc(100% - var(--g-bot)) 0); }
+.name-letter[data-glitch] .name-ink { clip-path: polygon(0 0, 100% 0, 100% var(--g-top), 0 var(--g-top), 0 var(--g-bot), 100% var(--g-bot), 100% 100%, 0 100%); }
 .bio {
   position: absolute; left: max(22px, calc(79 * var(--u))); top: max(70px, calc(141 * var(--u)));
   margin: 0; padding: 0; list-style: none;
@@ -69,6 +80,13 @@ body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
   pointer-events: auto;
 }
 .bio li { position: relative; padding-left: 1.5em; white-space: nowrap; }
+/* The typing topic: the name's orange, a block cursor after it. */
+.bio-exploring { white-space: nowrap; }
+.bio-topic { color: #e0803f; }
+.bio-cursor { display: inline-block; width: .5em; height: .9em; margin-left: .12em; vertical-align: -.1em; background: #e0803f; }
+.bio-cursor[data-blink] { animation: bio-blink 1s steps(1) infinite; }
+@keyframes bio-blink { 50% { visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { .bio-cursor[data-blink] { animation: none; } }
 .bio li::before { content: ""; position: absolute; width: .4em; height: .4em; border-radius: 50%; left: .27em; top: .5em; background: currentColor; }
 .site-nav {
   position: absolute; z-index: 5; right: max(20px, calc(74 * var(--u))); top: max(22px, calc(66 * var(--u)));
@@ -80,15 +98,15 @@ body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
 /* The nav stays put while the sky darkens behind it. */
 .stage[data-sky="night"] .site-nav { --nav: #fff5e8; }
 .site-nav a { color: var(--nav); text-decoration: none; cursor: pointer; transition: color 300ms ease; }
-.site-nav a[aria-current] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
-.site-nav a:hover, .site-nav a:focus-visible { color: #e59056; }
+/* The page you are on, in the name's orange. */
+.site-nav a[aria-current], .site-nav a:hover, .site-nav a:focus-visible { color: #e59056; }
 .site-nav a:focus-visible { outline: 2px solid #e59056; outline-offset: 4px; }
 .pixel-arrow { display: inline-block; width: .5em; height: .5em; flex: none; }
 .scroll-hint {
   position: absolute; left: 50%; bottom: max(14px, calc(24 * var(--u))); z-index: 2; translate: -50% 0;
   display: flex; flex-direction: column; align-items: center; gap: 7px;
   font-family: var(--font-pixel), "Courier New", monospace; font-weight: 500; font-size: 12px; letter-spacing: .14em;
-  color: #080909; opacity: calc(.55 * var(--objects, 1)); text-decoration: none; transition: color 200ms ease;
+  color: #080909; opacity: .55; text-decoration: none; transition: color 200ms ease;
 }
 .scroll-hint:hover, .scroll-hint:focus-visible { opacity: 1; color: #c25f26; outline: none; }
 .scroll-hint .pixel-arrow { width: 9px; height: 9px; animation: hint-bob 2.4s ease-in-out infinite; }
@@ -107,74 +125,244 @@ body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
 .zone-experience { --ink: #fff5e8; --soft: rgb(255 245 232 / .86); --muted: rgb(255 245 232 / .7); --rule: rgb(255 245 232 / .2); --halo: rgb(18 30 60 / .85); }
 .zone-strip { display: none; }
 /* A soft halo in the ground's own colour keeps small type crisp over the sand's dither. */
-.zone-content { position: absolute; inset: 0; color: var(--ink); text-shadow: 0 0 6px var(--halo), 0 0 2px var(--halo); opacity: var(--presence, 1); }
+.zone-content { position: absolute; inset: 0; color: var(--ink); text-shadow: 0 0 6px var(--halo), 0 0 2px var(--halo); }
 .zone-content a { pointer-events: auto; }
 .zone[data-faded] .zone-content a { pointer-events: none; }
-.zone-head {
-  position: absolute; left: max(20px, calc(74 * var(--u))); top: max(22px, calc(66 * var(--u)));
-  display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px calc(36 * var(--u));
-}
-.zone-title {
-  margin: 0; font-family: var(--font-pixel), "Courier New", monospace; font-weight: 500; color: #e59056;
-  font-size: max(22px, calc(44 * var(--u))); line-height: 1; letter-spacing: .06em; outline: none;
-}
-.zone-index { color: var(--ink); opacity: .55; }
-.zone-note, .zone-links {
-  margin: 0; padding: 0; list-style: none; display: flex; gap: calc(28 * var(--u));
-  font-family: var(--font-pixel), "Courier New", monospace; font-size: max(12px, calc(19 * var(--u))); letter-spacing: .04em; color: var(--muted);
-}
-.zone-note a, .zone-links a, .project-title a, .job-company a { color: inherit; text-decoration: none; transition: color 200ms ease; }
-.zone-note a:hover, .zone-links a:hover, .project-title a:hover, .job-company a:hover,
-.zone-note a:focus-visible, .zone-links a:focus-visible, .project-title a:focus-visible, .job-company a:focus-visible { color: #c25f26; }
-.zone-experience :is(.zone-note,.zone-links,.job-company) a:is(:hover,:focus-visible) { color: #f2a774; }
+/* A section the camera only passes through on its way elsewhere (Home ↔ Experience): its
+   content stays out of sight and out of reach until the move ends. The beach still shows. */
+.zone-content { transition: opacity 180ms ease; }
+.zone[data-passing] .zone-content { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 180ms ease, visibility 0s 180ms; }
 .zone-content a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 .zone-content .pixel-arrow { width: .46em; height: .46em; margin-left: .4em; vertical-align: .1em; transition: translate 200ms ease; }
 .zone-content a:hover .pixel-arrow, .zone-content a:focus-visible .pixel-arrow { translate: 2px -2px; }
 
-/* Projects: three entries on the open dusk sand, below the thin strip of sea. */
-.project-list {
-  position: absolute; margin: 0; padding: 0; list-style: none;
-  left: max(20px, calc(74 * var(--u))); right: max(20px, calc(74 * var(--u)));
-  top: calc((548 - var(--y0)) / var(--wh) * 100%);
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(56 * var(--u));
-  max-width: calc(1500 * var(--u));
+/*
+  Projects: frosted-glass panels over the dusk beach, three to a row. The panel area is
+  its own scroller (scrollbar hidden), so further rows come up as you scroll; once at its
+  end the page scrolls on. Knobs: the variables on .pcard-grid.
+*/
+.project-scroll {
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; pointer-events: auto; touch-action: pan-y pinch-zoom;
+  padding: max(84px, calc(140 * var(--u))) max(20px, calc(74 * var(--u))) max(40px, calc(70 * var(--u)));
+  text-shadow: none;
 }
-.project { border-top: 1px solid var(--rule); padding-top: calc(22 * var(--u)); }
-.project-media {
-  display: block; height: calc(118 * var(--u)); width: auto; aspect-ratio: 3 / 2; object-fit: cover;
-  margin-bottom: calc(18 * var(--u)); border: 1px solid var(--rule); background: #f4f3f1;
+.project-scroll::-webkit-scrollbar { display: none; }
+.zone[data-faded] .project-scroll { pointer-events: none; }
+.pcard-grid {
+  --cols: 3;
+  --gap: max(18px, calc(34 * var(--u)));
+  /* The glass. Fill: a cool white, mostly clear. */
+  --glass: rgb(244 248 255 / .06);
+  --glass-hover: rgb(248 251 255 / .13);
+  --glass-blur: 4px;                        /* frosting: low enough to make out the waves */
+  --glass-saturate: 1.5;                    /* colours behind come through richer, not grey */
+  --glass-bright: 1.08;                     /* lifts what's behind slightly, so it never goes muddy */
+  --edge: rgb(255 255 255 / .38);           /* the thin rim */
+  --edge-light: rgb(255 255 255 / .95);     /* where light catches the rim (top-left) */
+  --sheen: rgb(255 255 255 / .34);          /* top reflection */
+  --reading: rgb(248 251 255 / .22);          /* a touch more frost under the text */
+  --frost-blur: 9px;                        /* behind the text */
+  --clear-band: 26px;                       /* clear strip under the image (from 18px over its edge) */
+  --shadow: 0 28px 56px -32px rgb(36 44 86 / .34), 0 3px 10px -4px rgb(36 44 86 / .1);
+  --radius: 18px;
+  position: relative;
+  margin: 0 auto; padding: 0; list-style: none; max-width: 1280px;
+  display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: var(--gap);
 }
-.project-title, .job-company {
+/* A soft, cool veil behind the panels: calms the sand's dither so the glass reads cleanly. */
+.pcard-grid::before {
+  content: ""; position: absolute; z-index: -1; inset: -6% -4% -10%; pointer-events: none;
+  background: radial-gradient(60% 55% at 50% 55%, rgb(232 238 252 / .1), rgb(232 238 252 / 0) 70%);
+  filter: blur(20px);
+}
+.pcard { display: flex; }
+.pcard-inner {
+  position: relative; isolation: isolate; display: flex; flex-direction: column; width: 100%; overflow: hidden;
+  border-radius: var(--radius); color: var(--ink); text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: transform 420ms cubic-bezier(.2,.8,.2,1), box-shadow 420ms ease;
+}
+/* The clear pane: the whole card, barely frosted, so the scene reads through it. */
+.pcard-glass {
+  position: absolute; z-index: -2; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-bright));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-bright));
+  transition: background-color 320ms ease;
+}
+/* Optical highlights: a hairline of light along the top edge that fades out before the
+   corners, a faint glint in the top-left corner, and a soft inner glow along the sides. */
+.pcard-inner::before {
+  content: ""; position: absolute; z-index: -1; inset: 0; border-radius: inherit; pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 6%, rgb(255 255 255 / .9) 30%, rgb(255 255 255 / .6) 65%, transparent 94%) top / 100% 1px no-repeat,
+    radial-gradient(40% 22% at 8% 0%, var(--sheen), transparent 70%),
+    linear-gradient(180deg, rgb(255 255 255 / .1), transparent 22%);
+  box-shadow: inset 1px 0 0 rgb(255 255 255 / .16), inset -1px 0 0 rgb(255 255 255 / .1), inset 0 -1px 0 rgb(255 255 255 / .14);
+}
+/* The rim: brightest where the light comes from (top-left), barely there elsewhere. */
+.pcard-inner::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(150deg, var(--edge-light), var(--edge) 18%, rgb(255 255 255 / .1) 50%, rgb(255 255 255 / .18) 80%, rgb(255 255 255 / .45));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+a.pcard-inner:hover, a.pcard-inner:focus-visible {
+  --glass: var(--glass-hover); --sheen: rgb(255 255 255 / .5); transform: translateY(-3px);
+  box-shadow: 0 36px 70px -34px rgb(36 44 86 / .42), 0 4px 14px -6px rgb(36 44 86 / .13);
+}
+a.pcard-inner:focus-visible { outline: 2px solid #e59056; outline-offset: 3px; }
+.pcard-media {
+  margin: 8px 8px 0; aspect-ratio: 16 / 9; border-radius: calc(var(--radius) - 7px); overflow: hidden;
+  background: rgb(255 255 255 / .3); box-shadow: 0 0 0 1px rgb(255 255 255 / .3), 0 6px 16px -10px rgb(36 44 86 / .35);
+}
+.pcard-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 700ms cubic-bezier(.2,.8,.2,1); }
+a.pcard-inner:hover .pcard-media img { transform: scale(1.03); }
+.pcard-media-empty { display: block; width: 100%; height: 100%; }
+.pcard-body {
+  position: relative; isolation: isolate; display: flex; flex-direction: column; flex: 1;
+  padding: max(14px, calc(20 * var(--u))) max(16px, calc(22 * var(--u))) max(14px, calc(18 * var(--u)));
+  text-shadow: 0 0 10px rgb(255 255 255 / .75), 0 0 3px rgb(255 255 255 / .7);
+}
+/* The frost behind the text: fades in from clear just above the title, so there's no edge. */
+.pcard-frost {
+  position: absolute; z-index: -1; inset: -18px 0 0; pointer-events: none;
+  background: linear-gradient(180deg, rgb(255 255 255 / .04), var(--reading));
+  -webkit-backdrop-filter: blur(var(--frost-blur)) saturate(1.3) brightness(1.06);
+  backdrop-filter: blur(var(--frost-blur)) saturate(1.3) brightness(1.06);
+  /* Clear in the thin strip right under the image, where the shoreline passes; from the
+     title down, the frost is as before. */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0 var(--clear-band), rgb(0 0 0 / .4) calc(var(--clear-band) + 16px), #000 90%);
+  mask-image: linear-gradient(180deg, transparent 0 var(--clear-band), rgb(0 0 0 / .4) calc(var(--clear-band) + 16px), #000 90%);
+}
+.pcard-title {
   margin: 0; font-family: var(--font-pixel), "Courier New", monospace; font-weight: 500;
-  font-size: max(15px, calc(25 * var(--u))); line-height: 1.2; letter-spacing: .01em; color: var(--ink);
+  font-size: max(16px, calc(24 * var(--u))); line-height: 1.2; letter-spacing: .01em; color: var(--ink);
 }
-.project-text, .job-text {
-  margin: calc(10 * var(--u)) 0 0; max-width: 46ch; color: var(--soft);
-  font-size: max(13px, calc(19 * var(--u))); line-height: 1.5;
+.pcard-nowrap { white-space: nowrap; }
+.pcard-title .pixel-arrow { width: .42em; height: .42em; margin-left: .45em; vertical-align: .12em; color: #c25f26; transition: translate 220ms ease; }
+a.pcard-inner:hover .pcard-title .pixel-arrow { translate: 2px -2px; }
+.pcard-text { margin: max(6px, calc(9 * var(--u))) 0 0; color: #1f2636; font-size: max(13.5px, calc(17 * var(--u))); line-height: 1.5; }
+.pcard-tech {
+  margin: auto 0 0; padding: max(12px, calc(16 * var(--u))) 0 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px;
+  font-family: var(--font-pixel), "Courier New", monospace; font-size: max(11px, calc(13 * var(--u))); letter-spacing: .03em; color: #232a3a;
 }
-.project-tech {
-  margin: calc(12 * var(--u)) 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px calc(16 * var(--u));
-  font-family: var(--font-pixel), "Courier New", monospace; font-size: max(11px, calc(16 * var(--u))); letter-spacing: .03em; color: var(--muted);
+.pcard-tech li { padding: 3px 9px; border-radius: 999px; background: rgb(40 52 90 / .06); box-shadow: inset 0 0 0 1px rgb(40 52 90 / .1), inset 0 1px 0 rgb(255 255 255 / .6); text-shadow: none; }
+.pcard-link { margin-top: max(10px, calc(13 * var(--u))); font-family: var(--font-pixel), "Courier New", monospace; font-size: max(11px, calc(13 * var(--u))); letter-spacing: .06em; color: #a24e1d; }
+.pgrid-spacer { height: calc(max(14px, calc(20 * var(--u))) * 1.2 + max(14px, calc(22 * var(--u)))); }
+@media (max-width: 700px), (max-aspect-ratio: 4/5), (max-height: 620px) { .pgrid-spacer { display: none; } }
+/* Scroll reveal (components/home/Reveal.tsx): rise and fade in, staggered along a row. */
+[data-armed] [data-reveal]:not([data-shown]) { opacity: 0; transform: translateY(26px); }
+[data-armed] [data-reveal] { transition: opacity 700ms ease calc(var(--i, 0) * 90ms), transform 900ms cubic-bezier(.2,.8,.2,1) calc(var(--i, 0) * 90ms); }
+@media (max-width: 1100px) { .pcard-grid { --cols: 2; } }
+@media (max-width: 640px) { .pcard-grid { --cols: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .tl-check, .tl-seg, .tl-date, .tl-body { animation: none !important; }
+  .tl-item[data-current] :is(.r4, .r5) { animation: none; }
+  .pcard-inner, .pcard-media img, .pcard-title .pixel-arrow { transition: none; }
+  a.pcard-inner:hover, a.pcard-inner:focus-visible { transform: none; }
+  a.pcard-inner:hover .pcard-media img { transform: none; }
 }
 
-/* Experience: four roles across the night sky, above the returning sea. */
-.job-list {
+/*
+  Experience: a pixel-art path through the night sky, newest on the left. Everything is
+  measured in --p, one art pixel, rounded to whole screen pixels so edges stay crisp.
+  Knobs: the variables on .timeline.
+*/
+.timeline {
+  --p: round(nearest, max(3px, calc(4.4 * var(--u))), 1px);   /* one art pixel */
+  --mark: calc(7 * var(--p));                                  /* checkpoint size (7 × 7 art pixels) */
+  --track: calc(9 * var(--p));                                 /* the path's row */
+  --col-gap: calc(52 * var(--u));
+  --path: rgb(170 190 232 / .42);       /* muted blue: the stars are the anchors */
+  --path-lit: rgb(214 226 255 / .72);   /* blue-white */
+  --warm: #e59056; --warm-shine: #ffe3c4; --cream: #fffaf3;
+  --step: 340ms;                        /* reveal: time per checkpoint */
   position: absolute; margin: 0; padding: 0; list-style: none;
   left: max(20px, calc(74 * var(--u))); right: max(20px, calc(74 * var(--u)));
-  top: max(84px, calc(158 * var(--u)));
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: calc(48 * var(--u));
-  max-width: calc(1560 * var(--u));
+  top: max(96px, calc(170 * var(--u))); max-width: calc(1560 * var(--u));
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--col-gap);
 }
-.job { border-top: 1px solid var(--rule); padding-top: calc(20 * var(--u)); }
-.job-role { margin: calc(8 * var(--u)) 0 0; font-size: max(13px, calc(18 * var(--u))); color: var(--soft); }
-.job-dates { color: var(--muted); white-space: nowrap; }
+.tl-item { position: relative; min-width: 0; pointer-events: auto; }
+/* A name given as lines keeps exactly those lines. */
+.tl-line { display: block; white-space: nowrap; }
+.tl-date {
+  margin: 0 0 calc(5 * var(--p)); font-family: var(--font-pixel), "Courier New", monospace; font-size: max(10px, calc(14 * var(--u)));
+  letter-spacing: .2em; text-transform: uppercase; color: rgb(196 212 248 / .75); white-space: nowrap;
+}
+.tl-item[data-current] .tl-date { color: var(--warm-shine); }
+/* The path row. The segment runs from this checkpoint to the next: dashes of 3 art pixels,
+   1 off, sitting on the row's middle pixel line, with a darker pixel row under it. */
+.tl-track { position: relative; height: var(--track); }
+.tl-seg {
+  position: absolute; top: calc(4 * var(--p)); height: var(--p);
+  left: calc(9 * var(--p)); width: calc(100% + var(--col-gap) - 15 * var(--p));
+  background: repeating-linear-gradient(90deg, var(--path) 0 calc(3 * var(--p)), transparent 0 calc(4 * var(--p)));
+  box-shadow: 0 var(--p) 0 rgb(10 18 40 / .3);
+}
+/* After the oldest role the path trails off into the dark: sparser, shorter. */
+.tl-item[data-last] .tl-seg {
+  width: calc(36 * var(--p));
+  background: repeating-linear-gradient(90deg, var(--path) 0 var(--p), transparent 0 calc(4 * var(--p)));
+}
+/* The star: 11 × 11 art pixels, its core on the path's line, under the role's text edge. */
+.tl-check { position: absolute; left: calc(-2 * var(--p)); top: calc(-1 * var(--p)); width: calc(11 * var(--p)); height: calc(11 * var(--p)); }
+.tl-star { display: block; width: 100%; height: 100%; overflow: visible; }
+.tl-core { fill: var(--core); }
+.tl-glow { fill: var(--inner); }
+.tl-ray { fill: var(--ray); visibility: hidden; }
+.tl-ray.r1 { fill: var(--inner); }
+.tl-ray.r3, .tl-ray.r4, .tl-ray.r5 { fill: var(--tip); }
+/* Older roles: icy, short rays. The current one: warm, one pixel longer. */
+.tl-item { --core: #f4f8ff; --inner: #c9d7f5; --ray: #8fa6d6; --tip: rgb(143 166 214 / .55); }
+.tl-item .r1, .tl-item .r2 { visibility: visible; }
+.tl-item[data-current] { --core: #fff3e2; --inner: #ffc58f; --ray: #e59056; --tip: rgb(229 144 86 / .6); }
+.tl-item[data-current] .r3 { visibility: visible; }
+/* Hover: the rays reach out one pixel further and the star brightens. Instant, no easing. */
+.tl-item:is(:hover, :focus-within) .r3 { visibility: visible; }
+.tl-item[data-current]:is(:hover, :focus-within) .r4 { visibility: visible; }
+.tl-item:is(:hover, :focus-within) { --inner: var(--core); --path: var(--path-lit); }
+/* The current star twinkles continuously: its rays reach out one pixel, then two, and
+   back, in discrete steps. */
+.tl-item[data-current] .r4 { animation: tl-twinkle4 1.6s steps(1) infinite; }
+.tl-item[data-current] .r5 { animation: tl-twinkle5 1.6s steps(1) infinite; }
+@keyframes tl-twinkle4 { 0%, 24% { visibility: hidden; } 25%, 74% { visibility: visible; } 75%, 100% { visibility: hidden; } }
+@keyframes tl-twinkle5 { 0%, 41% { visibility: hidden; } 42%, 57% { visibility: visible; } 58%, 100% { visibility: hidden; } }
+.tl-body { padding-top: calc(7 * var(--p)); padding-right: 4px; }
+.tl-company {
+  margin: 0; display: flex; align-items: flex-start; gap: max(8px, calc(12 * var(--u)));
+  font-family: var(--font-pixel), "Courier New", monospace; font-weight: 500;
+  font-size: max(15px, calc(26 * var(--u))); line-height: 1.15; letter-spacing: .01em; color: rgb(255 250 243 / .9);
+  transition: color 0s;
+}
+.tl-company a { color: inherit; text-decoration: none; }
+.tl-company .pixel-arrow { width: .4em; height: .4em; margin-left: .4em; vertical-align: .1em; }
+/* Every logo starts exactly where the date and title below it start, and is centred on
+   the name's first line, even when a name wraps. */
+.tl-logo { flex: none; display: block; width: auto; max-width: max(40px, calc(52 * var(--u))); height: max(24px, calc(32 * var(--u))); object-fit: contain; object-position: left center; opacity: .9;
+  margin-top: calc((1.15em - max(24px, calc(32 * var(--u)))) / 2); }
+.tl-role { margin: max(6px, calc(10 * var(--u))) 0 0; font-size: max(13px, calc(18 * var(--u))); color: rgb(255 245 232 / .72); }
+.tl-item[data-current] .tl-company { color: var(--cream); }
+/* Hover also lights the path on to the next role and brightens the company. */
+.tl-item:hover .tl-company, .tl-item:focus-within .tl-company { color: var(--cream); }
+.tl-item:hover .tl-logo { opacity: 1; }
+.tl-item:hover .tl-role { color: rgb(255 245 232 / .86); }
+.tl-company a:focus-visible { outline: var(--p) solid var(--warm); outline-offset: calc(2 * var(--p)); }
+/* Reveal: from the left, each checkpoint pops in (in three pixel steps), the path to the
+   next one builds in pixel increments, and its text steps up into place. */
+.timeline[data-armed]:not([data-shown]) :is(.tl-check, .tl-date, .tl-body) { opacity: 0; }
+.timeline[data-armed]:not([data-shown]) .tl-seg { clip-path: inset(0 100% 0 0); }
+.timeline[data-shown] .tl-check { animation: tl-pop 150ms steps(3) both; animation-delay: calc(var(--i) * var(--step)); }
+.timeline[data-shown] .tl-seg { animation: tl-build var(--step) steps(12) both; animation-delay: calc(var(--i) * var(--step) + 120ms); }
+.timeline[data-shown] .tl-date { animation: tl-rise 240ms steps(3) both; animation-delay: calc(var(--i) * var(--step) + 60ms); }
+.timeline[data-shown] .tl-body { animation: tl-rise 260ms steps(3) both; animation-delay: calc(var(--i) * var(--step) + 140ms); }
+@keyframes tl-pop { from { clip-path: inset(50%); } to { clip-path: inset(-100%); } }
+@keyframes tl-build { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes tl-rise { from { opacity: 0; transform: translateY(calc(3 * var(--p))); } to { opacity: 1; transform: none; } }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
 /* Narrow desktop windows: two columns, still clear of the sea. */
-@media (max-aspect-ratio: 3/2) {
-  .job-list { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: calc(24 * var(--u)); }
-  .job-text { margin-top: calc(6 * var(--u)); max-width: 60ch; }
-}
+
 
 /*
   Phones, tall tablets and very short windows: no sticky panorama. The hero stays as it
@@ -182,10 +370,8 @@ body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
   continuing in that stretch's colour.
 */
 @media (max-width: 700px), (max-aspect-ratio: 4/5), (max-height: 620px) {
-  html { scroll-snap-type: none; }
   .site { height: auto; }
-  .track-stops { display: none; }
-  .stage { position: relative; height: auto; overflow: visible; }
+  .stage { position: relative; height: auto; overflow: visible; touch-action: auto; }
   .homepage { position: relative; height: 100svh; overflow: clip; }
   .zone { position: relative; inset: auto; transform: none; pointer-events: auto; background: var(--bg); }
   .zone-projects { --bg: #dddbdf; }
@@ -193,17 +379,27 @@ body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
   /* Ends on the colour the section continues in, so it is anchored at the bottom. */
   .zone-strip { display: block; width: 100%; height: auto; max-height: 56svh; object-fit: cover; object-position: center bottom; image-rendering: pixelated; }
   .zone-content { position: relative; inset: auto; padding: 8px 25px 56px; max-width: 1100px; }
-  .zone-head, .project-list, .job-list { position: static; }
-  .zone-head { margin-bottom: 26px; }
-  .zone-title { font-size: 26px; }
-  .zone-note, .zone-links { font-size: 13px; gap: 18px; }
-  .project-list, .job-list { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; max-width: none; }
-  .project, .job { padding-top: 18px; }
-  .project-media { height: auto; width: 100%; max-width: 420px; margin-bottom: 14px; }
-  .project-title, .job-company { font-size: 19px; }
-  .project-text, .job-text { font-size: 15.5px; }
-  .project-tech { font-size: 13px; gap: 4px 14px; }
-  .job-role { font-size: 15px; }
+  /* Stacked: the path runs down the left, newest at the top, each role beside its checkpoint. */
+  .timeline { --p: 3px; position: relative; inset: auto; display: block; max-width: 640px; padding-left: calc(12 * var(--p)); }
+  .tl-item { padding-bottom: 36px; }
+  .tl-track { position: absolute; left: calc(-12 * var(--p)); top: 0; bottom: 0; width: var(--track); height: auto; }
+  .tl-seg {
+    left: calc(4 * var(--p)); top: calc(10 * var(--p)); width: var(--p); height: calc(100% - 13 * var(--p));
+    background: repeating-linear-gradient(180deg, var(--path) 0 calc(3 * var(--p)), transparent 0 calc(4 * var(--p)));
+    box-shadow: var(--p) 0 0 rgb(10 18 40 / .45);
+  }
+  .tl-item[data-last] .tl-seg { width: var(--p); height: calc(16 * var(--p));
+    background: repeating-linear-gradient(180deg, var(--path) 0 var(--p), transparent 0 calc(4 * var(--p))); }
+  .tl-check { left: calc(-1 * var(--p)); top: calc(-1 * var(--p)); }
+  .tl-date { margin-bottom: 8px; font-size: 11px; line-height: calc(9 * var(--p)); }
+  .tl-body { padding-top: 0; }
+  .tl-company { font-size: 19px; }
+  .tl-logo { height: 26px; width: auto; max-width: 44px; margin-top: calc((1.15em - 26px) / 2); }
+  .tl-role { font-size: 15px; }
+  @keyframes tl-build { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
+  .project-scroll { overflow: visible; overflow-x: clip; padding: 20px 20px 56px; touch-action: auto; }
+  .pcard-title { font-size: 19px; }
+  .pcard-text { font-size: 15px; }
 }
 /* Phones and tall tablets: the introduction stacks above a crop that keeps the sun and both objects. */
 @media (max-width: 700px), (max-aspect-ratio: 4/5) {
@@ -215,15 +411,207 @@ body { font-family: Arial, Helvetica, sans-serif; overflow-x: clip; }
   .name img { height: auto; }
   .name .name-first { width: min(66%, 270px); }
   .name .name-last { width: min(94%, 385px); }
+  .name .name-word img.name-base { width: 100%; }
   .bio { position: relative; left: auto; top: auto; margin-top: 21px; font-size: 16px; line-height: 1.65; letter-spacing: -.3px; }
   .bio li { padding-left: 19px; white-space: normal; margin-bottom: 6px; }
+  .bio .bio-exploring { white-space: nowrap; }
   .bio li::before { width: 6px; height: 6px; left: 1px; top: 10px; }
   .scene-window { position: relative; inset: auto; flex: none; width: 100%; aspect-ratio: 700 / 832; }
   .scroll-hint { bottom: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .scene-canvas { transition: none; }
+  .scene-canvas, .zone-content, .zone[data-passing] .zone-content { transition: none; }
   .scroll-hint .pixel-arrow { animation: none; }
   .pixel-arrow, .site-nav a { transition: none; }
+}
+
+/*
+  The camera, picked up (components/home/CameraGallery.tsx, lib/coast/pickup.ts). The
+  beach stays in place underneath; only the view's window, the two sprites and a soft
+  darkening move. Sprites are positioned at their held size and transformed from there.
+*/
+.camera-held { position: fixed; inset: 0; z-index: 50; }
+.camera-dim {
+  position: absolute; inset: 0; opacity: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 54%, rgb(10 12 18 / .3), rgb(10 12 18 / .16));
+}
+.camera-front, .camera-back {
+  position: absolute; max-width: none; visibility: hidden; pointer-events: none;
+  backface-visibility: hidden; transform-origin: 50% 50%;
+}
+.camera-front img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.camera-back-art { display: block; width: 100%; height: 100%; user-select: none; }
+.camera-back[data-sharp="true"] .camera-back-art { image-rendering: pixelated; }
+.camera-held[data-phase="open"] .camera-back { pointer-events: auto; }
+
+/* The LCD: the screen's own colour, so no second frame is drawn over the bezel. Its
+   contents are sized in the screen's own units and scale with the camera. */
+.lcd {
+  position: absolute; overflow: hidden; background: #121517; color: #d9dcd6; outline: none;
+  container-type: size; display: flex; flex-direction: column;
+  font-family: var(--font-pixel), "Courier New", monospace; font-weight: 500; letter-spacing: .04em;
+}
+.lcd > * { opacity: var(--power, 0); transition: opacity 120ms steps(3); }
+.lcd-status {
+  flex: none; display: flex; align-items: center; gap: 2.4cqw; height: 11cqh; padding: 0 3.2cqw;
+  font-size: 5.6cqh; line-height: 1; color: #c9ccc6;
+}
+.lcd-play { width: 0; height: 0; border-top: 1.9cqh solid transparent; border-bottom: 1.9cqh solid transparent; border-left: 3cqh solid #e59056; }
+.lcd-gap { flex: 1; }
+.lcd-battery { position: relative; width: 6.4cqh; height: 3.4cqh; border: .6cqh solid currentColor; padding: .5cqh; }
+.lcd-battery::after { content: ""; position: absolute; right: -1.4cqh; top: .6cqh; width: .7cqh; height: 1.2cqh; background: currentColor; }
+.lcd-battery i { display: block; width: 70%; height: 100%; background: currentColor; }
+.lcd-empty, .lcd-note {
+  margin: auto; font-size: 6.4cqh; letter-spacing: .14em; color: #aeb2ac;
+}
+.lcd-grid {
+  flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; margin: 0; list-style: none;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: start;
+  gap: 1.6cqw; padding: 1cqh 3.2cqw 3.2cqw;
+}
+.lcd-grid::-webkit-scrollbar { display: none; }
+.lcd-thumb {
+  display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; border: 0; background: #1d2124;
+  outline: .45cqw solid transparent; outline-offset: -.45cqw; cursor: pointer;
+}
+.lcd-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.lcd-thumb[aria-current="true"], .lcd-thumb:hover { outline-color: #e59056; }
+/* A single photo uses the whole screen, like a camera's playback; the status line sits
+   over it, as camera firmware overlays it. The photo keeps its own proportions. */
+.lcd-photo { position: absolute; inset: 0; margin: 0; display: flex; animation: lcd-swap 140ms steps(3); }
+.lcd[data-mode="photo"] .lcd-status { position: absolute; z-index: 1; left: 0; right: 0; top: 0; text-shadow: 0 0 .6cqh #000, 0 0 1.2cqh #000; }
+.lcd-photo img { width: 100%; height: 100%; object-fit: contain; }
+.lcd-photo img[data-state="loading"] { opacity: 0; }
+.lcd-photo .lcd-note { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; }
+.lcd-photo figcaption { position: absolute; left: 0; bottom: 0; padding: .8cqh 1.4cqw; font-size: 4.6cqh; color: #d9dcd6; background: rgb(18 21 23 / .7); }
+@keyframes lcd-swap { from { opacity: .3; } to { opacity: 1; } }
+
+/* The camera's buttons: invisible, exactly over the drawn ones. */
+.camera-key { position: absolute; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 18%; }
+.camera-key::after { content: ""; position: absolute; inset: 8%; border-radius: inherit; background: rgb(255 255 255 / 0); transition: background 90ms ease; }
+.camera-key[data-pressed]::after { background: rgb(255 255 255 / .14); }
+.camera-key:focus-visible { outline: 2px solid #e59056; outline-offset: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lcd > *, .camera-key::after { transition: none; }
+  .lcd-photo { animation: none; }
+}
+
+/*
+  The JBL (components/home/Speaker.tsx): a DOM sprite over the scene, placed like the other
+  objects, so it pans with the beach. It bounces about its foot on the sand.
+*/
+.speaker { position: absolute; z-index: 1; pointer-events: none; }
+.speaker-body { position: absolute; inset: 0; will-change: transform; }
+.speaker-body img { display: block; width: 100%; height: 100%; user-select: none; }
+.speaker-sand { position: absolute; display: block; max-width: none; pointer-events: none; }
+.speaker-key {
+  position: absolute; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto;
+  border-radius: 22%; transform: rotate(7deg);
+}
+.speaker-key::after { content: ""; position: absolute; inset: 6%; border-radius: inherit; background: rgb(255 255 255 / 0); transition: background 90ms ease; }
+.speaker-key:hover::after { background: rgb(255 255 255 / .08); }
+.speaker-key:active::after { background: rgb(255 255 255 / .2); }
+.speaker-key:focus-visible { outline: 2px solid #e59056; outline-offset: 1px; }
+/* Little pixel "sound" marks at each end, as loud as the bass. */
+.speaker-waves {
+  position: absolute; top: 34%; width: 9%; height: 26%; opacity: calc(var(--beat, 0) * 1.4);
+  background:
+    linear-gradient(currentColor 0 0) 0 30% / 22% 12% no-repeat,
+    linear-gradient(currentColor 0 0) 40% 50% / 22% 12% no-repeat,
+    linear-gradient(currentColor 0 0) 0 70% / 22% 12% no-repeat;
+  color: #e59056; image-rendering: pixelated; pointer-events: none;
+}
+.speaker-waves-left { left: -7%; transform: scaleX(-1); }
+.speaker-waves-right { right: -9%; top: 46%; }
+
+/*
+  Music (components/music/NowPlaying.tsx): fixed to the window, bottom-left, and only
+  there while music plays. No container: our controls and Spotify's player sit straight
+  on the beach. The knobs: the variables just below.
+*/
+.music {
+  --music-width: 270px;             /* Spotify's player: its narrowest width before its buttons collide */
+  --music-gap: 12px;                /* from the window's edges */
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  position: fixed; z-index: 60;
+  left: max(var(--music-gap), env(safe-area-inset-left)); bottom: max(var(--music-gap), env(safe-area-inset-bottom));
+  width: min(var(--music-width), calc(100vw - 2 * var(--music-gap)));
+  opacity: 0; visibility: hidden; transform: translateY(8px);
+  transition: opacity 280ms var(--ease), transform 360ms var(--ease), visibility 0s 360ms;
+}
+.music[data-visible] { opacity: 1; visibility: visible; transform: none; transition: opacity 280ms var(--ease), transform 360ms var(--ease); }
+.music-embed { border-radius: 12px; overflow: hidden; }
+.music-embed iframe { display: block; border: 0; }
+@media (max-width: 700px) { .music { --music-gap: 12px; } }
+@media (prefers-reduced-motion: reduce) { .music, .music[data-visible] { transition: none; transform: none; } }
+/* The scroll hint steps aside for the music widget on narrow screens. */
+@media (max-width: 760px) { .scroll-hint { visibility: hidden; } }
+
+/*
+  The Experience meteor (components/home/Meteor.tsx, lib/coast/meteor.ts). The sprite is
+  placed at a world point (--mx, --my) through the scene window's variables, then shifted
+  so the sheet's anchor sits on it; art pixels are whole multiples (--ms) of screen pixels.
+*/
+@property --cell { syntax: "<integer>"; inherits: false; initial-value: 0; }
+.meteor, .meteor-warm, .meteor-hit {
+  position: absolute; z-index: 1;
+  left: round(nearest, calc((var(--mx) - var(--cam, var(--x0))) / var(--ww) * 100%), 1px);
+  top: round(nearest, calc((var(--my) - var(--y0)) / var(--wh) * 100%), 1px);
+}
+/* Pixel size: the flight's base size (it grows within its baked sheets), the landed one for the rest. */
+.meteor { --ms: var(--mfly, 2); }
+.meteor:is([data-seq="impact"], [data-seq="idle"], [data-seq="activation"]), .meteor-warm, .meteor-hit { --ms: var(--mland, 4); }
+/* The impact's early frames are baked larger, on the flight's pixel grid. */
+.meteor[data-seq="impact"][data-px="fly"] { --ms: var(--mfly, 2); }
+.meteor-warm { opacity: .004; }
+/* Development only (?meteor-debug, see MeteorDebug): the panorama-sized trajectory overlay, and the head anchor. */
+.meteor-debug {
+  position: absolute; z-index: 2; pointer-events: none;
+  left: calc(var(--cam, var(--x0)) / var(--ww) * -100%); top: calc(var(--y0) / var(--wh) * -100%);
+  width: calc(var(--pw) / var(--ww) * 100%); height: calc(var(--ph) / var(--wh) * 100%);
+}
+.meteor[data-debug]::after {
+  content: ""; position: absolute; width: 9px; height: 9px; border: 1px solid #5f8;
+  left: calc(var(--ax) * var(--ms, 2) * 1px - 5px); top: calc(var(--ay) * var(--ms, 2) * 1px - 5px);
+}
+.meteor, .meteor-warm {
+  width: calc(var(--fw) * var(--ms, 2) * 1px); height: calc(var(--fh) * var(--ms, 2) * 1px);
+  translate: calc(var(--ax) * var(--ms, 2) * -1px) calc(var(--ay) * var(--ms, 2) * -1px);
+  background-repeat: no-repeat; image-rendering: pixelated; pointer-events: none;
+  background-size: calc(var(--fw) * var(--fc) * var(--ms, 2) * 1px) calc(var(--fh) * var(--ms, 2) * 1px);
+  background-position: calc(var(--cell) * var(--fw) * var(--ms, 2) * -1px) 0;
+}
+.meteor[data-phase="waiting"] { visibility: hidden; }
+/* Resting: the rock's faint glow alternates between its two idle frames. */
+.meteor[data-phase="landed"][data-seq="idle"] { animation: meteor-idle 1.7s steps(1) infinite; }
+@keyframes meteor-idle { 0% { --cell: 0; } 50% { --cell: 1; } }
+/* The rock as a button: over the stone, at least 44 px, never the timeline's links. */
+.meteor-hit {
+  width: max(44px, calc(60 * var(--ms, 2) * 1px)); height: max(44px, calc(40 * var(--ms, 2) * 1px));
+  translate: -50% calc(-50% - 16 * var(--ms, 2) * 1px);
+  padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto;
+}
+.meteor-hit:focus-visible { outline: 2px solid #e59056; outline-offset: 2px; box-shadow: 0 0 0 4px #0f1a35; }
+/* The pulse: each star in turn turns warm for a moment and shows one more ray pixel. */
+.timeline.meteor-pulse .tl-item { animation: meteor-pulse 300ms steps(1); animation-delay: calc(var(--i) * 160ms); }
+.timeline.meteor-pulse .tl-item :is(.r3, .r4) { animation: meteor-ray 300ms steps(1); animation-delay: calc(var(--i) * 160ms); }
+@keyframes meteor-pulse {
+  0%, 99% { --core: #fff6ea; --inner: #ffd9b0; --ray: #f2a774; --tip: rgb(242 167 116 / .7); }
+}
+@keyframes meteor-ray { 0%, 99% { visibility: visible; } }
+.timeline.meteor-pulse-still .tl-item { --core: #fff6ea; --inner: #ffd9b0; --ray: #f2a774; }
+/* Phones only: the beach panel under the timeline. */
+.meteor-panel { display: none; }
+@media (max-width: 700px), (max-aspect-ratio: 4/5), (max-height: 620px) {
+  .meteor-panel { display: block; position: relative; overflow-x: clip; margin-top: -24px; }
+  .meteor-panel > img { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+}
+@media (prefers-reduced-motion: reduce) { .meteor { animation: none !important; } }
+
+/* Development only: the navigation state (?nav-debug, components/home/Panorama.tsx). */
+.nav-debug {
+  position: fixed; left: 12px; bottom: 12px; z-index: 100; margin: 0; padding: 8px 10px; pointer-events: none;
+  font: 11px/1.45 ui-monospace, Menlo, monospace; color: #e8f2ff; background: rgb(8 12 24 / .82); border-radius: 6px;
 }

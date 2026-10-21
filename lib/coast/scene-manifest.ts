@@ -1,14 +1,16 @@
 import derived from "@/public/coast/manifest.json";
 import panorama from "@/public/coast/pano/manifest.json";
+import speakerManifest from "@/public/coast/speaker.json";
 import type { CSSProperties } from "react";
 
 export const scene = derived;
 export const pano = panorama;
+/** The playable JBL (scripts/extract-speaker.py). */
+export const speaker = speakerManifest;
 export type Bounds = { x: number; y: number; width: number; height: number };
-export type SceneAction = "open-life" | "open-music";
+export type SceneAction = "open-life";
 export const sceneObjects = [
   { id: "camera", action: "open-life", label: "Life — photographs", ...scene.objects.camera },
-  { id: "speaker", action: "open-music", label: "On repeat — music", ...scene.objects.speaker },
 ] as const;
 
 /**

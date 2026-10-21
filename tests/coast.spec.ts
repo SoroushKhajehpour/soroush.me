@@ -30,8 +30,8 @@ test('semantic content, running clock, no pause control and live reduced motion'
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/'); await page.waitForFunction(()=>window.__coast?.ready);
   await expect(page.getByRole('heading',{level:1})).toHaveText('SOROUSH KHAJEHPOUR');
-  await expect(page.locator('.bio').getByRole('listitem')).toHaveCount(2);
-  await expect(page.getByRole('button')).toHaveCount(0);
+  await expect(page.locator('.bio').getByRole('listitem')).toHaveCount(3);
+  await expect(page.getByRole('button',{name:'Life — photographs'})).toHaveCount(1);
   await expect.poll(()=>page.evaluate(()=>window.__coast!.get().time)).toBeGreaterThan(.5);
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect.poll(()=>page.evaluate(()=>window.__coast!.get().reducedMotion)).toBe(true);
@@ -48,17 +48,18 @@ test('the scene fills every desktop viewport edge to edge without sideways scrol
     await page.setViewportSize({width,height});
     await page.goto('/'); await page.waitForFunction(()=>window.__coast?.ready);
     expect(await page.locator('.scene-window').boundingBox()).toEqual({x:0,y:0,width,height});
-    // The canvas is one scene pixel wider than the window and shifted by the camera's fraction.
-    const box=(await page.locator('.scene-canvas').boundingBox())!;
-    expect(box.x).toBeLessThanOrEqual(0); expect(box.x+box.width).toBeGreaterThanOrEqual(width-.5);
-    expect(box.y).toBe(0); expect(box.height).toBe(height);
+    expect(await page.locator('.scene-canvas').boundingBox()).toEqual({x:0,y:0,width,height});
     expect(await page.locator('.homepage').boundingBox()).toEqual({x:0,y:0,width,height});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);
-    expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeGreaterThan(height);
+    // The panorama page never scrolls: the camera moves instead (components/home/Panorama.tsx).
+    // Very short windows stack the zones into an ordinary scrolling page.
+    const pano=await page.evaluate(()=>window.__coast!.get().assets==='pano');
+    const scrollHeight=await page.evaluate(()=>document.documentElement.scrollHeight);
+    if (pano) expect(scrollHeight).toBe(height); else expect(scrollHeight).toBeGreaterThan(height);
     const buffer=await page.locator('.scene-canvas').evaluate((c:HTMLCanvasElement)=>[c.width,c.height]);
     expect(Math.abs(buffer[0]/buffer[1]-width/height)).toBeLessThan(.01);
-    for (const id of ['camera','speaker']) {
-      const bounds=await page.locator(`[data-object="${id}"]`).boundingBox();
+    for (const sel of ['[data-object="camera"]','.speaker']) {
+      const bounds=await page.locator(sel).boundingBox();
       expect(bounds!.x).toBeGreaterThanOrEqual(0);
       expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(width+1);
       expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(height+1);
@@ -67,11 +68,6 @@ test('the scene fills every desktop viewport edge to edge without sideways scrol
 });
 
 const camera=(page:Page)=>page.evaluate(()=>window.__coast!.get().view.x);
-const scrollTo=(page:Page,progress:number)=>page.evaluate(p=>{
-  document.documentElement.style.scrollBehavior='auto'; document.documentElement.style.scrollSnapType='none';
-  window.scrollTo(0,p*innerHeight);
-},progress);
-const settle=(page:Page)=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
 
 test('desktop draws the panorama and the nav pans the camera to each zone',async({page})=>{
   await page.setViewportSize({width:1744,height:992});
@@ -83,42 +79,67 @@ test('desktop draws the panorama and the nav pans the camera to each zone',async
   // The artwork's designed camera positions: Projects at 1914 and Experience at 3600 in its own coordinates.
   await expect.poll(()=>camera(page)).toBeCloseTo(1914+236,0);
   await expect(page).toHaveURL(/#projects$/);
-  await expect(page.getByRole('heading',{level:2,name:/PROJECTS/})).toBeFocused();
-  await expect(page.getByRole('heading',{level:2,name:/PROJECTS/})).toBeInViewport();
-  await expect(nav.getByRole('link',{name:'PROJECTS'})).toHaveAttribute('aria-current','');
+  await expect(page.getByRole('heading',{level:2,name:'Projects'})).toBeFocused();
+  await expect(page.locator('#projects .pcard').first()).toBeInViewport();
+  await expect(nav.getByRole('link',{name:'PROJECTS'})).toHaveAttribute('aria-current','location');
   await nav.getByRole('link',{name:'EXPERIENCE'}).click();
   await expect.poll(()=>camera(page)).toBeCloseTo(3600+236,0);
-  await expect(page.getByRole('heading',{level:2,name:/EXPERIENCE/})).toBeInViewport();
-  expect(await page.locator('#projects .project').count()).toBe(3);
-  expect(await page.locator('#experience .job').count()).toBe(4);
+  await expect(page.locator('#experience .tl-item').first()).toBeInViewport();
+  expect(await page.locator('#projects .pcard').count()).toBe(3);
+  expect(await page.locator('#experience .tl-item').count()).toBe(4);
   const resume=nav.getByRole('link',{name:/RESUME/});
   await expect(resume).toHaveAttribute('target','_blank');
   const response=await page.request.get((await resume.getAttribute('href'))!);
   expect(response.ok()).toBe(true);
   expect(response.headers()['content-type']).toContain('pdf');
   // A deep link opens on its zone.
-  await page.goto('/#experience'); await page.waitForFunction(()=>window.__coast?.ready);
+  await page.goto('/#experience'); await page.reload(); await page.waitForFunction(()=>window.__coast?.ready);
   await expect.poll(()=>camera(page)).toBeCloseTo(3600+236,0);
+  // HOME brings the camera back; only the page you have arrived at is highlighted.
+  await expect(nav.getByRole('link',{name:'EXPERIENCE'})).toHaveAttribute('aria-current','location');
+  await expect(nav.getByRole('link',{name:'EXPERIENCE'})).toHaveCSS('color','rgb(229, 144, 86)');
+  await nav.getByRole('link',{name:'HOME'}).click();
+  await expect.poll(()=>camera(page)).toBeCloseTo(236.4,0);
+  await expect(nav.getByRole('link',{name:'HOME'})).toHaveAttribute('aria-current','location');
+  await expect(nav.locator('[aria-current]')).toHaveCount(1);
+  // The zones carry no visible heading text, only their content.
+  for (const id of ['projects-title','experience-title']) {
+    const box=(await page.locator(`#${id}`).boundingBox())!;
+    expect(box.width*box.height).toBeLessThanOrEqual(1);
+  }
 });
 
-test('the objects are gone as whole sprites before the camera moves, and stay gone',async({page})=>{
-  await page.setViewportSize({width:1440,height:780});
-  await page.goto('/'); await page.waitForFunction(()=>window.__coast?.ready);
+test('the objects stay on the beach and pan with it, locked to the art',async({browser,baseURL})=>{
+  const page=await browser.newPage({viewport:{width:1440,height:780},hasTouch:true});
+  await page.goto(baseURL+'/?scene=reference'); await page.waitForFunction(()=>window.__coast?.ready);
   const home=await camera(page);
-  const opacity=()=>page.locator('.scene-objects').evaluate(e=>Number(getComputedStyle(e).opacity));
-  expect(await opacity()).toBe(1);
-  await scrollTo(page,.2); await settle(page);
-  expect(await camera(page)).toBe(home);                       // fading in place
-  expect(await opacity()).toBeGreaterThan(0); expect(await opacity()).toBeLessThan(1);
-  for (const p of [.33,.5,1,1.8,2.5,3.6]) {
-    await scrollTo(page,p); await settle(page);
-    expect(await opacity()).toBe(0);
-  }
-  await scrollTo(page,.5); await settle(page);
-  expect(await camera(page)).toBeGreaterThan(home);
-  // And they come back on the way home.
-  await scrollTo(page,0); await settle(page);
-  expect(await opacity()).toBe(1);
+  const k=1440/(await page.evaluate(()=>window.__coast!.get().view.width));
+  // The camera (drawn by the shader); the speaker is a DOM sprite in the same window.
+  const speaker={x:(1187-home)*k,y:765*k,w:240*k,h:128*k};
+  const domBefore=(await page.locator('.speaker').boundingBox())!;
+  const clip=(dx:number)=>page.screenshot({clip:{x:Math.round(speaker.x-dx),y:Math.round(speaker.y),width:Math.round(speaker.w),height:Math.round(speaker.h)}});
+  const before=await clip(0);
+  // Hold the camera part-way along a touch drag, and find the speaker exactly where it moved to.
+  const cdp=await page.context().newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:1000,y:300}]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:900,y:300}]});
+  await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+  const moved=(await camera(page)-home)*k;
+  const after=await clip(Math.round(moved));
+  const diff=await page.evaluate(async([x,y]:[string,string])=>{
+    const load=(s:string)=>new Promise<ImageData>(r=>{const i=new Image();i.onload=()=>{const k=document.createElement('canvas');k.width=i.width;k.height=i.height;const g=k.getContext('2d')!;g.drawImage(i,0,0);r(g.getImageData(0,0,i.width,i.height));};i.src=s;});
+    const [p,q]=await Promise.all([load(x),load(y)]);
+    let n=0;for(let i=0;i<p.data.length;i+=4) n+=Math.abs(p.data[i]-q.data[i]);
+    return n/(p.width*p.height);
+  },['data:image/png;base64,'+before.toString('base64'),'data:image/png;base64,'+after.toString('base64')] as [string,string]);
+  expect(moved).toBeGreaterThan(20);
+  expect(diff).toBeLessThan(12);  // the same camera, give or take a pixel's blend
+  const domAfter=(await page.locator('.speaker').boundingBox())!;
+  expect(Math.abs(domBefore.x-domAfter.x-moved)).toBeLessThan(.6);   // the speaker moved with it
+  // The DOM copies are only for the no-WebGL panorama still.
+  expect(await page.locator('.scene-objects').evaluate(e=>Number(getComputedStyle(e).opacity))).toBe(0);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await page.close();
 });
 
 test('keyboard reaches every zone and its links',async({page})=>{
@@ -131,21 +152,23 @@ test('keyboard reaches every zone and its links',async({page})=>{
   await page.keyboard.press('ArrowLeft'); await page.keyboard.press('ArrowLeft');
   await expect.poll(()=>page.locator('.stage').getAttribute('data-zone')).toBe('home');
   // Tabbing into a project link brings the camera to Projects.
-  await page.locator('#projects .project-title a').first().focus();
+  await page.locator('#projects .pcard-inner').first().focus();
   await expect.poll(()=>page.locator('.stage').getAttribute('data-zone')).toBe('projects');
-  await expect(page.locator('#projects .project-title a').first()).toBeInViewport();
+  await expect(page.locator('#projects .pcard-inner').first()).toBeInViewport();
 });
 
 test('reduced motion cuts between zones instead of panning',async({page})=>{
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.setViewportSize({width:1440,height:780});
   await page.goto('/'); await page.waitForFunction(()=>window.__coast?.ready);
-  const seen=new Set<number>();
-  for (let p=0;p<=3.6;p+=.15) { await scrollTo(page,p); await settle(page); seen.add(Math.round(await camera(page))); }
+  const frame=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+  const seen=new Set<number>([Math.round(await camera(page))]);
+  for (const key of ['ArrowRight','ArrowRight','ArrowLeft','ArrowLeft']) { await page.keyboard.press(key); await frame(); seen.add(Math.round(await camera(page))); }
+  // No glide either: the camera is already exactly at a zone after one frame.
   expect(seen.size).toBe(3);
   await page.getByRole('navigation',{name:'Primary'}).getByRole('link',{name:'EXPERIENCE'}).click();
-  await settle(page);
-  expect(await page.evaluate(()=>Math.round(window.scrollY/innerHeight*10)/10)).toBe(3.6);
+  await frame();
+  expect(Math.round(await camera(page))).toBe(Math.max(...seen));
 });
 
 test('without WebGL the clean panorama still pans, and the Home still never does',async({browser,baseURL})=>{
@@ -159,7 +182,8 @@ test('without WebGL the clean panorama still pans, and the Home still never does
   });
   await page.goto(baseURL!);
   await expect(page.locator('.scene-fallback').first()).toBeVisible();
-  await scrollTo(page,1.8);
+  await page.getByRole('navigation',{name:'Primary'}).getByRole('link',{name:'PROJECTS'}).click();
+  await expect.poll(()=>page.evaluate(()=>document.documentElement.dataset.arrived)).toBe('projects');
   const still=page.locator('.scene-fallback-panorama');
   await expect.poll(()=>still.evaluate((e:HTMLImageElement)=>e.complete&&e.naturalWidth===5580)).toBe(true);
   await expect(page.locator('.scene-fallback').first()).toBeHidden();
@@ -167,7 +191,7 @@ test('without WebGL the clean panorama still pans, and the Home still never does
   const ww=await page.evaluate(()=>parseFloat(getComputedStyle(document.querySelector('.site')!).getPropertyValue('--ww')));
   const left=(await still.boundingBox())!.x;
   expect(-left/(1440/ww)).toBeCloseTo(1914+236+(1744-ww)/2,-1);
-  await expect(page.getByRole('heading',{level:2,name:/PROJECTS/})).toBeInViewport();
+  await expect(page.locator('#projects .pcard').first()).toBeInViewport();
   await page.close();
 });
 
@@ -178,7 +202,7 @@ test('phones stack the zones under the unchanged hero and draw only the Home sce
     expect(await page.evaluate(()=>window.__coast!.get().assets)).toBe('home');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);
     await page.getByRole('navigation',{name:'Primary'}).getByRole('link',{name:'EXPERIENCE'}).click();
-    await expect(page.getByRole('heading',{level:2,name:/EXPERIENCE/})).toBeInViewport();
+    await expect(page.locator('#experience .tl-item').first()).toBeInViewport();
     const strip=(await page.locator('#projects .zone-strip').boundingBox())!;
     expect(strip.width).toBeCloseTo(width,0);
   }
@@ -210,8 +234,8 @@ test('reduced motion starts still and small screens retain the complete objects'
     const state=await page.evaluate(()=>window.__coast!.get());
     expect(state.time).toBe(0); expect(state.running).toBe(false);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);
-    for (const id of ['camera','speaker']) {
-      const bounds=await page.locator(`[data-object="${id}"]`).boundingBox();
+    for (const sel of ['[data-object="camera"]','.speaker']) {
+      const bounds=await page.locator(sel).boundingBox();
       expect(bounds!.x).toBeGreaterThanOrEqual(0);
       expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(width+1);
     }
@@ -258,5 +282,5 @@ test('context loss returns to the still without losing the bio',async({page})=>{
   await page.evaluate(()=>document.querySelector('canvas')!.getContext('webgl2')!.getExtension('WEBGL_lose_context')!.loseContext());
   await expect(page.locator('.scene-window')).toHaveAttribute('data-ready','false');
   await expect(page.locator('.scene-fallback')).toBeVisible();
-  await expect(page.locator('.bio').getByRole('listitem')).toHaveCount(2);
+  await expect(page.locator('.bio').getByRole('listitem')).toHaveCount(3);
 });

@@ -2,9 +2,18 @@ export const profile = {
   name: "SOROUSH KHAJEHPOUR",
   details: [
     "computer engineering @ uwaterloo",
-    "seeking summer 2027 internships",
+    "seeking summer 2027 opportunities",
   ],
 };
+
+/** The intro's middle line: "exploring" and a topic that types itself (components/home/Exploring.tsx). */
+export const exploring = {
+  topics: ["machine learning", "computer vision", "embedded systems", "robotics", "computer architecture", "GPU computing"],
+  typeMs: 75,      // per character typed
+  holdMs: 2700,    // whole topic shown
+  deleteMs: 42,    // per character deleted
+  gapMs: 250,      // empty, before the next topic
+} as const;
 
 export type RGB = readonly [number, number, number];
 export interface Environment {

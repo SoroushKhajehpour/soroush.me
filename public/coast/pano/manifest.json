@@ -5,6 +5,12 @@
     "width": 760,
     "height": 412
   },
+  "cameraSand": {
+    "x": 1179,
+    "y": 757,
+    "width": 256,
+    "height": 144
+  },
   "width": 5580,
   "height": 992,
   "horizon": 422,
@@ -31,6 +37,13 @@
       "width": 700,
       "height": 440,
       "edge": "#26436d"
+    },
+    "experience-beach": {
+      "x": 4420,
+      "y": 640,
+      "width": 700,
+      "height": 352,
+      "edge": "#24436e"
     }
   },
   "duskStart": 1600,
